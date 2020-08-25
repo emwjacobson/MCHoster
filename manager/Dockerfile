@@ -24,11 +24,9 @@ RUN apt-get update && \
 
 WORKDIR /manager
 
-COPY manager.py .
+COPY app.py .
 COPY requirements.txt .
 
 RUN python3 -m pip install -r requirements.txt
-
-ENV FLASK_APP manager.py
 
 CMD [ "flask", "run", "--host=0.0.0.0" ]
