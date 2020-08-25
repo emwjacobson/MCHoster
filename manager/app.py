@@ -35,8 +35,15 @@ def stats():
 @app.route('/stats/<cid>')
 def stats_container(cid):
     cid = escape(cid)
+    if len(cid) < 20:
+        return {
+            **error,
+            "message": "Invalid container"
+        }
+
     try:
         container = client.containers.get(cid)
+
         return {
             **success,
             "message": "",
@@ -57,8 +64,11 @@ def stats_container(cid):
 @app.route('/start')
 @app.route('/start/<username>')
 def start_server(username=None):
+    username = escape(username)
+
     try:
-        container = client.containers.run('mchoster-server', mem_limit='2g', cpu_count=2, remove=True, detach=True, ports={'25565/tcp': None, '25565/udp': None}, labels=['mcsm'])
+        container = client.containers.run('mchoster-server', mem_limit='1.5g', cpu_quota=150000, remove=True,
+                                          detach=True, ports={'25565/tcp': None, '25565/udp': None}, labels=['mcsm'])
     except docker.errors.ImageNotFound as e:
         return {
             **error,
@@ -85,7 +95,8 @@ def stop_server(cid):
     cid = escape(cid)
     try:
         container = client.containers.get(cid)
-        container.stop(timeout=10)
+        container.exec_run("/bin/sh -c 'kill $(pidof java)'", detach=True)
+        container.stop(timeout=30)
         return {
             **success,
             "message": "Container stopped"
