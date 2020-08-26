@@ -19,7 +19,8 @@ RUN apt-get update && \
         containerd.io \
         python3 \
         python3-dev \
-        python3-pip && \
+        python3-pip \
+        python3-setuptools && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /manager

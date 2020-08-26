@@ -1,5 +1,6 @@
 import docker
 from flask import *
+from mcstatus import MinecraftServer
 
 app = Flask(__name__)
 client = docker.from_env()
@@ -179,4 +180,4 @@ def index():
     return "", 404
 
 if __name__ == "__main__":
-    app.run()
+    pass
