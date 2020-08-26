@@ -7,13 +7,41 @@ client = docker.from_env()
 success = {"status": "success"}
 error = {"status": "error"}
 
+check_label = "mcsm"
+
 server_limit = 10
 
 def get_port(container):
-    return container.attrs['NetworkSettings']['Ports']['25565/tcp'][0]['HostPort']
+    """Returns the port that `container` is attached to on the host
+
+    Args:
+        container (Container): The mc server container
+
+    Returns:
+        int: The port that the mc server is attached to on the host
+    """
+    return int(container.attrs['NetworkSettings']['Ports']['25565/tcp'][0]['HostPort'])
 
 def get_containers():
-    return client.containers.list(filters={"label": ["mcsm"]})
+    """Returns list of containers running MC Server
+
+    Returns:
+        List: List of Containers, sorted from newest to oldest. list[0] is newest, list[-1] is oldest
+    """
+    return sorted(client.containers.list(filters={"label": [check_label]}), key=lambda x: x.attrs['Created'], reverse=True)
+
+def create_container(username):
+    """Created a new server container
+
+    Args:
+        username (string): The username for the OP user (unimplemented)
+
+    Returns:
+        Container: The mc server container
+    """
+    return client.containers.run('mchoster-server', mem_limit='1.5g', cpu_quota=150000, cpu_period= 100000, remove=True,
+                                 detach=True, ports={'25565/tcp': None, '25565/udp': None}, labels={check_label: '', 'username': username})
+
 
 @app.route('/stats')
 def stats():
@@ -23,7 +51,11 @@ def stats():
             **success,
             "message": "",
             "num_running": len(containers),
-            "servers": [{"id": c.id, "port": get_port(c)} for c in containers]
+            "servers": [{
+                "id": c.id,
+                "port": get_port(c),
+                "created": c.attrs['Created']
+            } for c in containers]
         }
     except docker.errors.APIError as e:
         return {
@@ -54,7 +86,8 @@ def stats_container(cid):
             **success,
             "message": "",
             "id": cid,
-            "port": get_port(container)
+            "port": get_port(container),
+            "created": container.attrs['Created']
         }
     except docker.errors.NotFound as e:
         return {
@@ -62,6 +95,7 @@ def stats_container(cid):
             "message": e.explanation
         }
     except Exception as e:
+        print(e)
         return {
             **error,
             "message": "An error has occured"
@@ -86,8 +120,7 @@ def start_server(username=None):
         }
 
     try:
-        container = client.containers.run('mchoster-server', mem_limit='1.5g', cpu_quota=150000, remove=True,
-                                          detach=True, ports={'25565/tcp': None, '25565/udp': None}, labels={'mcsm': '', 'username': username})
+        container = create_container(username)
     except docker.errors.ImageNotFound as e:
         return {
             **error,
@@ -103,6 +136,7 @@ def start_server(username=None):
             "port": get_port(container)
         }
     except Exception as e:
+        print(e)
         container.stop()
         return {
             **error,
@@ -124,7 +158,7 @@ def stop_server(cid):
 
     try:
         container = client.containers.get(cid)
-        if 'mscm' in container.labels:
+        if check_label in container.labels:
             container.exec_run("/bin/sh -c 'kill $(pidof java)'", detach=True)
             container.stop(timeout=30)
             return {
