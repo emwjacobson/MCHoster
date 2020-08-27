@@ -16,6 +16,9 @@ This is the image of the MC server itself. It is based off [PaperMC](https://pap
 ### web
 This is the Django web server, it handles the interactions with the end users.
 
+### db
+This will be the container that manages the databases. Still unimplemented.
+
 ## Requirements
 ### Software
 - Docker
