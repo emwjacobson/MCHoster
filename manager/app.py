@@ -51,9 +51,11 @@ def create_container(username):
     Returns:
         Container: The mc server container
     """
-    return client.containers.run('mchoster-server', mem_limit='1.5g', cpu_quota=100000, cpu_period= 100000, remove=True,
-                                 detach=True, ports={'25565/tcp': None, '25565/udp': None}, labels={check_label: '', 'username': username},
-                                 network=check_label)
+    vol = {username: {'bind': '/server', 'mode': 'rw'}} if username != None else False
+    return client.containers.run('mchoster-server', mem_limit='1.5g', cpu_quota=100000, cpu_period= 100000,
+                                 remove=True, detach=True, ports={'25565/tcp': None, '25565/udp': None},
+                                 labels={check_label: '', 'username': username}, network=check_label,
+                                 volumes=vol)
 
 
 @app.route('/stats')
@@ -86,10 +88,10 @@ def stats():
 @app.route('/stats/<cid>')
 def stats_container(cid):
     cid = escape(cid)
-    if len(cid) < 20:
+    if len(cid) < 64:
         return {
             **error,
-            "message": "Invalid container"
+            "message": "Invalid container id"
         }
 
     try:
@@ -117,7 +119,8 @@ def stats_container(cid):
 @app.route('/start')
 @app.route('/start/<username>')
 def start_server(username=None):
-    username = escape(username)
+    if username != None:
+        username = escape(username)
 
     try:
         containers = get_containers()
@@ -163,10 +166,16 @@ def stop_server(cid):
     # TODO: Remove this in the future
     if cid == 'all':
         for c in get_containers():
-            c.exec_run("/bin/sh -c 'kill $(pidof java)'", detach=True)
+            stop_server(c.id)
         return {
             **success,
             "message": "Servers stopping"
+        }
+
+    if len(cid) < 64:
+        return {
+            **error,
+            "message": "Invalid container"
         }
 
     try:
@@ -193,5 +202,8 @@ def index():
 
 if __name__ == "__main__":
     for c in get_containers():
-        server = MinecraftServer.lookup(get_ip(c))
-        print(server.status().players.online)
+        try:
+            server = MinecraftServer.lookup(get_ip(c))
+            print(server.status().players.online)
+        except ConnectionRefusedError as e:
+            print(f"Server {get_ip(c)} down?")
