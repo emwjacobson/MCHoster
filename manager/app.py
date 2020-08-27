@@ -10,7 +10,7 @@ error = {"status": "error"}
 
 check_label = "mcsm"
 
-server_limit = 10
+server_limit = 15
 
 def get_port(container):
     """Returns the port that `container` is attached to on the host
@@ -22,6 +22,17 @@ def get_port(container):
         int: The port that the mc server is attached to on the host
     """
     return int(container.attrs['NetworkSettings']['Ports']['25565/tcp'][0]['HostPort'])
+
+def get_ip(container):
+    """Returns the IP address of `container`
+
+    Args:
+        container (Container): The mc server container
+
+    Returns:
+        str: IP Address of the container
+    """
+    return container.attrs['NetworkSettings']['Networks'][check_label]['IPAddress']
 
 def get_containers():
     """Returns list of containers running MC Server
@@ -40,8 +51,9 @@ def create_container(username):
     Returns:
         Container: The mc server container
     """
-    return client.containers.run('mchoster-server', mem_limit='1.5g', cpu_quota=150000, cpu_period= 100000, remove=True,
-                                 detach=True, ports={'25565/tcp': None, '25565/udp': None}, labels={check_label: '', 'username': username})
+    return client.containers.run('mchoster-server', mem_limit='1.5g', cpu_quota=100000, cpu_period= 100000, remove=True,
+                                 detach=True, ports={'25565/tcp': None, '25565/udp': None}, labels={check_label: '', 'username': username},
+                                 network=check_label)
 
 
 @app.route('/stats')
@@ -180,4 +192,6 @@ def index():
     return "", 404
 
 if __name__ == "__main__":
-    pass
+    for c in get_containers():
+        server = MinecraftServer.lookup(get_ip(c))
+        print(server.status().players.online)
