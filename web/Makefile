@@ -6,7 +6,7 @@ build:
 	docker build --pull --rm -t $(IMAGE_NAME):latest .
 
 run:
-	docker run --rm -it --net mcsm -p 8888:8000 $(IMAGE_NAME):latest
+	docker run --rm -it --net mcsm --network-alias web -p 8888:8000 $(IMAGE_NAME):latest
 
 dev:
-	docker run --rm -it --net mcsm -p 8888:5000 -v $(shell pwd):/app $(IMAGE_NAME):latest bash
+	docker run --rm -it --net mcsm --network-alias web -p 8888:8000 -v $(shell pwd):/app:rw $(IMAGE_NAME):latest bash
