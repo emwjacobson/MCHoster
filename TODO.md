@@ -1,5 +1,9 @@
 # Things I should do eventually
 
+## General
+- Readme instructions
+- Per-component Readmes
+
 ## Manager
 - Remove /stop/all endpoint
 - Volumes - limit size?
