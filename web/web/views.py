@@ -17,5 +17,5 @@ def stats(request):
         print(e)
         return render(request, 'web/stats.html', context={'stats': {'status': 'error', 'message': 'Error with backend manager'}})
 
-    stats = {'stats': res}
+    stats = {'stats': res, 'total_players': sum(ser['num_players'] for ser in res['servers'])}
     return render(request, 'web/stats.html', context=stats)

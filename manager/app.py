@@ -11,7 +11,7 @@ error = {"status": "error"}
 
 check_label = "mcsm"
 
-server_limit = 15
+server_limit = 10
 
 def get_port(container):
     """Returns the port that `container` is attached to on the host
@@ -35,6 +35,21 @@ def get_ip(container):
     """
     return container.attrs['NetworkSettings']['Networks'][check_label]['IPAddress']
 
+def get_online(container):
+    """Gets the number of players online on a server
+
+    Args:
+        container (Container): The container to check the amount of players
+
+    Returns:
+        int: The number of players on the server
+    """
+    try:
+        server = MinecraftServer.lookup(get_ip(container))
+        return server.status().players.online
+    except Exception as e:
+        return -1
+
 def get_created(container) -> datetime:
     """Gets the datetime of when a container was created
 
@@ -44,6 +59,7 @@ def get_created(container) -> datetime:
     Returns:
         datetime: The datetime object of when the container was created
     """
+    # Might be something like ISO 8601 to reduce the headache with this formatting
     return datetime.strptime(container.attrs['Created'][0:-11], "%Y-%m-%dT%H:%M:%S")
 
 def get_containers():
@@ -92,7 +108,8 @@ def stats():
                 "id": c.id,
                 "port": get_port(c),
                 "created": get_created(c),
-                "alive_for": (datetime.now() - get_created(c)).total_seconds()
+                "alive_for": (datetime.now() - get_created(c)).total_seconds(),
+                "num_players": get_online(c)
             } for c in containers]
         }
     except docker.errors.APIError as e:
@@ -126,7 +143,8 @@ def stats_container(cid):
             "id": cid,
             "port": get_port(container),
             "created": get_created(container),
-            "alive_for": (datetime.now() - get_created(container)).total_seconds()
+            "alive_for": (datetime.now() - get_created(container)).total_seconds(),
+            "num_players": get_online(container)
         }
     except docker.errors.NotFound as e:
         return {
@@ -229,8 +247,7 @@ if __name__ == "__main__":
         total_seconds = diff.total_seconds()
         if (total_seconds > 600):
             try:
-                server = MinecraftServer.lookup(get_ip(c))
-                num_online = server.status().players.online
+                num_online = get_online(c)
 
                 if num_online == 0:
                     print("Stopping container for being alive too long without active players")

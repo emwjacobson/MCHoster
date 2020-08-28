@@ -11,9 +11,28 @@
             Hmm, looks like there was an error fetching stats...<br>
             {{ stats.message }}
         {% elif stats.status|lower == 'success' %}
-            There {% if stats.num_running == 1 %}is{% else %}are{% endif %} currently {{ stats.num_running }} running server{% if stats.num_running != 1 %}s{% endif %} out of {{ stats.max_running }}.
+            There {% if stats.num_running == 1 %}is{% else %}are{% endif %} currently {{ stats.num_running }} running server{% if stats.num_running != 1 %}s{% endif %} out of {{ stats.max_running }}.<br>
+            There are a total of {{ total_players }} players!
         {% endif %}
         </p>
+
+        <div class="container">
+            <div class="row">
+                {% for cont in stats.servers %}
+                <div class="col-lg-3" style="padding-top:10px;">
+                    <div class="card">
+                        <div class="card-header">Server {{ cont.id|slice:":8" }}</div>
+                        <div class="card-body">
+                            <p class="card-text">Alive for {{ cont.alive_for|floatformat:0 }} seconds.</p>
+                            <p class="card-text">{{ cont.num_players }} player{% if cont.num_players != 1 %}s{% endif %} {% if cont.num_players != 1 %}are{% else %}is{% endif %} online!</p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                Nothing to report here...
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock content %}
