@@ -99,6 +99,7 @@ def stop_container(container):
 def stats():
     try:
         containers = get_containers()
+
         return {
             **success,
             "message": "",
@@ -109,7 +110,8 @@ def stats():
                 "port": get_port(c),
                 "created": get_created(c),
                 "alive_for": (datetime.now() - get_created(c)).total_seconds(),
-                "num_players": get_online(c)
+                "num_players": get_online(c),
+                "username": c.labels['username']
             } for c in containers]
         }
     except docker.errors.APIError as e:
@@ -144,7 +146,8 @@ def stats_container(cid):
             "port": get_port(container),
             "created": get_created(container),
             "alive_for": (datetime.now() - get_created(container)).total_seconds(),
-            "num_players": get_online(container)
+            "num_players": get_online(container),
+            "username": container.labels['username']
         }
     except docker.errors.NotFound as e:
         return {
@@ -163,6 +166,11 @@ def stats_container(cid):
 def start_server(username=None):
     if username != None:
         username = escape(username)
+        if len(username) < 5:
+            return {
+                **error,
+                "message": "Username too short"
+            }
 
     try:
         containers = get_containers()
@@ -171,6 +179,13 @@ def start_server(username=None):
                 **error,
                 "message": "Maximum amount of servers reached"
             }
+
+        for c in containers:
+            if c.labels['username'] == username:
+                return {
+                    **error,
+                    "message": "A server with that username has already been started"
+                }
     except docker.errors.APIError as e:
         return {
             **error,
@@ -223,6 +238,11 @@ def stop_server(cid):
     try:
         container = client.containers.get(cid)
         if check_label in container.labels:
+            if (datetime.now() - get_created(container)).total_seconds() < 120:
+                return {
+                    **error,
+                    "message": "Container is too new to be stopped"
+                }
             stop_container(container)
             return {
                 **success,
