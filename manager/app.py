@@ -2,6 +2,9 @@ import docker
 from flask import *
 from mcstatus import MinecraftServer
 from datetime import datetime
+import time
+
+# Global Variables
 
 app = Flask(__name__)
 client = docker.from_env()
@@ -12,6 +15,11 @@ error = {"status": "error"}
 check_label = "mcsm"
 
 server_limit = 10
+
+# END Global Variables
+
+
+# Helper Functions
 
 def get_port(container):
     """Returns the port that `container` is attached to on the host
@@ -44,11 +52,14 @@ def get_online(container):
     Returns:
         int: The number of players on the server
     """
+    # If the server is <2 minutes old, just return 0. Chances are its still being setup and checking a server thats still starting causes a slowdown
+    if (datetime.now() - get_created(container)).total_seconds() < 120:
+        return 0
     try:
         server = MinecraftServer.lookup(get_ip(container))
         return server.status().players.online
     except Exception as e:
-        return -1
+        return 0
 
 def get_created(container) -> datetime:
     """Gets the datetime of when a container was created
@@ -60,7 +71,8 @@ def get_created(container) -> datetime:
         datetime: The datetime object of when the container was created
     """
     # Might be something like ISO 8601 to reduce the headache with this formatting
-    return datetime.strptime(container.attrs['Created'][0:-11], "%Y-%m-%dT%H:%M:%S")
+    pi = container.attrs['Created'].index(".")
+    return datetime.strptime(container.attrs['Created'][0:pi], "%Y-%m-%dT%H:%M:%S")
 
 def get_containers():
     """Returns list of containers running MC Server
@@ -94,6 +106,10 @@ def stop_container(container):
     container.exec_run("/bin/sh -c 'kill $(pidof java)'", detach=True)
     container.stop(timeout=30)
 
+# END Helper Functions
+
+
+# REST Endpoints
 
 @app.route('/stats')
 def stats():
@@ -125,7 +141,6 @@ def stats():
             **error,
             "message": "An error has occured"
         }
-
 
 @app.route('/stats/<cid>')
 def stats_container(cid):
@@ -256,10 +271,62 @@ def stop_server(cid):
             "message": e.explanation
         }
 
+@app.route('/reset/<username>')
+def reset_server(username):
+    if username != None:
+        username = escape(username)
+        if len(username) < 5:
+            return {
+                **error,
+                "message": "Username too short"
+            }
+
+    # Stop any servers with the username if they are running
+    for c in get_containers():
+        if c.labels['username'] == username:
+            stop_container(c)
+            break
+
+    # Make sure the volume for `username` exists
+    try:
+        vol = client.volumes.get(username)
+    except docker.errors.NotFound as e:
+        return {
+            **error,
+            "message": "Username not found"
+        }
+    except Exception as e:
+        print(e)
+        return {
+            **error,
+            "message": "There was an error"
+        }
+
+    # Finally remove the volume
+    try:
+        vol.reload()
+        vol.remove(force=True)
+    except Exception as e:
+        print(e)
+        return {
+            **error,
+            "message": "There was an error"
+        }
+
+    return {
+        **success,
+        "message": "Server has been reset"
+    }
 
 @app.route('/')
 def index():
     return "", 404
+
+# END REST Endpoints
+
+
+# This code is ran when the program is run as pure python.
+# Intended to be used as a cron-job to clean up servers
 
 if __name__ == "__main__":
     for c in get_containers():

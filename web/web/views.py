@@ -1,13 +1,15 @@
 from django.shortcuts import render, HttpResponse
 import requests
 import json
+from django.core.handlers.wsgi import WSGIRequest
 
 def get_endpoint(endpoint):
     res = requests.get(f'http://manager:5000/{endpoint}')
     return json.loads(res.text)
 
 # Create your views here.
-def index(request):
+def index(request: WSGIRequest):
+    print(request.path)
     return render(request, 'web/index.html', {})
 
 def stats(request):
@@ -19,3 +21,6 @@ def stats(request):
 
     stats = {'stats': res, 'total_players': sum(ser['num_players'] for ser in res['servers'])}
     return render(request, 'web/stats.html', context=stats)
+
+def start(request):
+    return render(request, 'web/start.html', {})
