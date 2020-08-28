@@ -9,7 +9,8 @@ RUN apt-get update && \
         ca-certificates \
         curl \
         gnupg-agent \
-        software-properties-common && \
+        software-properties-common \
+        cron && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" && \
     apt-get update && \
@@ -30,4 +31,8 @@ COPY requirements.txt .
 
 RUN python3 -m pip install -r requirements.txt
 
-CMD [ "flask", "run", "--host=0.0.0.0" ]
+COPY data/server-cleaner /etc/cron.d/server-cleaner
+RUN chmod 0644 /etc/cron.d/server-cleaner
+RUN crontab /etc/cron.d/server-cleaner
+
+CMD cron && FLASK_DEBUG=true flask run --host=0.0.0.0

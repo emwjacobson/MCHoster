@@ -11,7 +11,7 @@
 - If container with volume already running, don't allow another container to start with same volume
 - If another container was started too recently, dont start a new one - prevents from overlapping CPU heavy tasks
 - Use <username> as the OP on the server
-- Add cronjob to check if a server has been running for too long without players, if so stop it.
+- Minimum length for <username>
 
 ## MCServer
 

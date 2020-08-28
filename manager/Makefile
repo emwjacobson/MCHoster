@@ -9,4 +9,4 @@ run:
 	docker run --rm -it --net mcsm --network-alias manager -p 8080:5000 -v /var/run/docker.sock:/var/run/docker.sock $(IMAGE_NAME):latest
 
 dev:
-	docker run --rm -it --net mcsm --network-alias manager -p 8080:5000 -v /var/run/docker.sock:/var/run/docker.sock -v $(shell pwd):/manager $(IMAGE_NAME):latest bash
+	docker run --rm -it --net mcsm --network-alias manager -p 8080:5000 -v /var/run/docker.sock:/var/run/docker.sock -v $(shell pwd):/manager $(IMAGE_NAME):latest

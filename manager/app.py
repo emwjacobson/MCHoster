@@ -1,6 +1,7 @@
 import docker
 from flask import *
 from mcstatus import MinecraftServer
+from datetime import datetime
 
 app = Flask(__name__)
 client = docker.from_env()
@@ -34,13 +35,24 @@ def get_ip(container):
     """
     return container.attrs['NetworkSettings']['Networks'][check_label]['IPAddress']
 
+def get_created(container) -> datetime:
+    """Gets the datetime of when a container was created
+
+    Args:
+        container (Container): The container to find the time created of
+
+    Returns:
+        datetime: The datetime object of when the container was created
+    """
+    return datetime.strptime(container.attrs['Created'][0:-11], "%Y-%m-%dT%H:%M:%S")
+
 def get_containers():
     """Returns list of containers running MC Server
 
     Returns:
         List: List of Containers, sorted from newest to oldest. list[0] is newest, list[-1] is oldest
     """
-    return sorted(client.containers.list(filters={"label": [check_label]}), key=lambda x: x.attrs['Created'], reverse=True)
+    return sorted(client.containers.list(filters={"label": [check_label]}), key=lambda x: get_created(x), reverse=True)
 
 def create_container(username):
     """Created a new server container
@@ -57,6 +69,15 @@ def create_container(username):
                                  labels={check_label: '', 'username': username}, network=check_label,
                                  volumes=vol)
 
+def stop_container(container):
+    """Stops `container`
+
+    Args:
+        container (Container): The container you want to stop
+    """
+    container.exec_run("/bin/sh -c 'kill $(pidof java)'", detach=True)
+    container.stop(timeout=30)
+
 
 @app.route('/stats')
 def stats():
@@ -70,7 +91,8 @@ def stats():
             "servers": [{
                 "id": c.id,
                 "port": get_port(c),
-                "created": c.attrs['Created']
+                "created": get_created(c),
+                "alive_for": (datetime.now() - get_created(c)).total_seconds()
             } for c in containers]
         }
     except docker.errors.APIError as e:
@@ -103,7 +125,8 @@ def stats_container(cid):
             "message": "",
             "id": cid,
             "port": get_port(container),
-            "created": container.attrs['Created']
+            "created": get_created(container),
+            "alive_for": (datetime.now() - get_created(container)).total_seconds()
         }
     except docker.errors.NotFound as e:
         return {
@@ -182,8 +205,7 @@ def stop_server(cid):
     try:
         container = client.containers.get(cid)
         if check_label in container.labels:
-            container.exec_run("/bin/sh -c 'kill $(pidof java)'", detach=True)
-            container.stop(timeout=30)
+            stop_container(container)
             return {
                 **success,
                 "message": "Container stopped"
@@ -203,8 +225,15 @@ def index():
 
 if __name__ == "__main__":
     for c in get_containers():
-        try:
-            server = MinecraftServer.lookup(get_ip(c))
-            print(server.status().players.online)
-        except ConnectionRefusedError as e:
-            print(f"Server {get_ip(c)} down?")
+        diff = datetime.now() - get_created(c)
+        total_seconds = diff.total_seconds()
+        if (total_seconds > 600):
+            try:
+                server = MinecraftServer.lookup(get_ip(c))
+                num_online = server.status().players.online
+
+                if num_online == 0:
+                    print("Stopping container for being alive too long without active players")
+                    stop_container(c)
+            except ConnectionRefusedError as e:
+                print(f"Server {get_ip(c)} down?")
