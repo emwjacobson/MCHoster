@@ -66,6 +66,7 @@ def stats():
             **success,
             "message": "",
             "num_running": len(containers),
+            "max_running": server_limit,
             "servers": [{
                 "id": c.id,
                 "port": get_port(c),

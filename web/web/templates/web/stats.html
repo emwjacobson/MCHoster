@@ -1,6 +1,6 @@
 {% extends "web/base.html" %}
 
-{% block title %}Home - {{ block.super }}{% endblock title %}
+{% block title %}Stats - {{ block.super }}{% endblock title %}
 
 {% block content %}
 <div class="card">
@@ -11,7 +11,7 @@
             Hmm, looks like there was an error fetching stats...<br>
             {{ stats.message }}
         {% elif stats.status|lower == 'success' %}
-            There are {{ stats.num_running }} running servers!
+            There {% if stats.num_running == 1 %}is{% else %}are{% endif %} currently {{ stats.num_running }} running server{% if stats.num_running != 1 %}s{% endif %} out of {{ stats.max_running }}.
         {% endif %}
         </p>
     </div>
