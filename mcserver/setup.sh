@@ -6,4 +6,4 @@ if [ ! -f server.jar ]; then
 fi
 
 # Run server
-java -Xms${RAM} -Xmx${RAM} -jar server.jar nogui
+echo "op ${OP_USERNAME}" | java -Xms${RAM} -Xmx${RAM} -jar server.jar nogui

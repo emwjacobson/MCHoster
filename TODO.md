@@ -3,12 +3,12 @@
 ## General
 - Readme instructions
 - Per-component Readmes
+- Look into running Django and Flask in Production
 
 ## Manager
 - Remove /stop/all endpoint
 - Volumes - limit size?
 - If another container was started too recently, dont start a new one - prevents from overlapping CPU heavy tasks
-- Use `username` as the OP on the server
 - If a volume hasent been used in >= 5 days(?) delete the volume to conserve space
 
 ## MCServer

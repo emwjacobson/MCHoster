@@ -92,10 +92,11 @@ def create_container(username):
         Container: The mc server container
     """
     vol = {username: {'bind': '/server', 'mode': 'rw'}} if username != None else False
+    env = [f"OP_USERNAME={username}"] if username != None else False
     return client.containers.run('mchoster-server', mem_limit='1.5g', cpu_quota=100000, cpu_period= 100000,
                                  remove=True, detach=True, ports={'25565/tcp': None, '25565/udp': None},
                                  labels={check_label: '', 'username': username}, network=check_label,
-                                 volumes=vol)
+                                 volumes=vol, environment=env)
 
 def stop_container(container):
     """Stops `container`
