@@ -12,7 +12,6 @@
 - If a volume hasent been used in >= 5 days(?) delete the volume to conserve space
 
 ## MCServer
-- Apply optimizations: https://www.spigotmc.org/threads/guide-server-optimization%E2%9A%A1.283181/
 
 ## Web
 - Use Docker secrets for the db password
