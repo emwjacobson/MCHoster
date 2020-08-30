@@ -4,7 +4,7 @@ import json
 from django.core.handlers.wsgi import WSGIRequest
 
 def get_endpoint(endpoint):
-    res = requests.get(f'http://manager:5000/{endpoint}')
+    res = requests.get(f'http://manager/{endpoint}')
     return json.loads(res.text)
 
 # Create your views here.

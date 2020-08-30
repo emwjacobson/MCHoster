@@ -35,4 +35,4 @@ COPY data/server-cleaner /etc/cron.d/server-cleaner
 RUN chmod 0644 /etc/cron.d/server-cleaner
 RUN crontab /etc/cron.d/server-cleaner
 
-CMD cron && FLASK_DEBUG=true flask run --host=0.0.0.0
+CMD cron && gunicorn -w 4 -b 0.0.0.0:80 app:app

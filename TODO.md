@@ -12,6 +12,7 @@
 - Volumes - limit size?
 - If another container was started too recently, dont start a new one - prevents from overlapping CPU heavy tasks
 - If a volume hasent been used in >= 5 days(?) delete the volume to conserve space
+- When resetting, check if container too new
 
 ## MCServer
 - When new version of MC is available, but existing volume exists (with old MC version), download new jar
