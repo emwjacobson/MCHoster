@@ -4,6 +4,8 @@
 - Readme instructions
 - Per-component Readmes
 - Look into running Django and Flask in Production
+- Docker-compose
+- Implement some kinda CI?
 
 ## Manager
 - Remove /stop/all endpoint
@@ -12,10 +14,13 @@
 - If a volume hasent been used in >= 5 days(?) delete the volume to conserve space
 
 ## MCServer
+- When new version of MC is available, but existing volume exists (with old MC version), download new jar
 
 ## Web
 - Use Docker secrets for the db password
-- Add ability to start server with a username
+- Add pages
+    - Stop server
+    - Reset server
 
 ## Database
 - Use Docker secrets for the password

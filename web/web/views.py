@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, HttpResponseRedirect, reverse
 import requests
 import json
 from django.core.handlers.wsgi import WSGIRequest
@@ -23,4 +23,14 @@ def stats(request):
     return render(request, 'web/stats.html', context=stats)
 
 def start(request):
-    return render(request, 'web/start.html', {})
+    try:
+        username = request.POST['username']
+        res = get_endpoint(f'start/{username}')
+        print(res)
+        return render(request, 'web/start.html', {'view': 'response', 'data': res})
+    except KeyError as e:
+        # If 'username' doesnt exist in post, render normal page
+        return render(request, 'web/start.html', {'view': 'normal'})
+    except Exception as e:
+        print(e)
+        return HttpResponseRedirect(reverse('index'))

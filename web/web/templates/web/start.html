@@ -1,14 +1,38 @@
 {% extends "web/base.html" %}
 
-{% block title %}Home - {{ block.super }}{% endblock title %}
+{% block title %}Start - {{ block.super }}{% endblock title %}
 
 {% block content %}
 <div class="card">
-    <h5 class="card-header">About</h5>
+    <h5 class="card-header">Start a Server!</h5>
     <div class="card-body">
-        <h5 class="card-title">Hi there!</h5>
         <p class="card-text">
-            Im still implementing this page :)
+        {% if view == 'normal' %}
+            <div class="col-lg-6 offset-3">
+                <form action="{% url 'start' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-row col-lg-12">
+                        <div class="form-group col">
+                            <label for="username">MC Username</label>
+                            <input type="text" class="form-control" name="username" id="username">
+                        </div>
+                        <div class="form-group col-lg-12 text-center">
+                            <button type="submit" class="btn btn-primary">Start Server!</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        {% elif view == 'response' %}
+            <div class="col-lg-8 offset-2">
+                {% if data.status == 'success' %}
+                Message: {{ data.message }}<br>
+                ID: {{ data.id }}<br>
+                Port: {{ data.port }}
+                {% elif data.status == 'error' %}
+                Message: {{ data.message }}
+                {% endif %}
+            </div>
+        {% endif %}
         </p>
     </div>
 </div>

@@ -93,7 +93,7 @@ def create_container(username):
     """
     vol = {username: {'bind': '/server', 'mode': 'rw'}} if username != None else False
     env = [f"OP_USERNAME={username}"] if username != None else False
-    return client.containers.run('mchoster-server', mem_limit='1.5g', cpu_quota=100000, cpu_period= 100000,
+    return client.containers.run('mchoster-server:latest', mem_limit='1.5g', cpu_quota=100000, cpu_period= 100000,
                                  remove=True, detach=True, ports={'25565/tcp': None, '25565/udp': None},
                                  labels={check_label: '', 'username': username}, network=check_label,
                                  volumes=vol, environment=env)
@@ -330,6 +330,7 @@ def index():
 # Intended to be used as a cron-job to clean up servers
 
 if __name__ == "__main__":
+
     for c in get_containers():
         diff = datetime.now() - get_created(c)
         total_seconds = diff.total_seconds()
