@@ -12,7 +12,7 @@ client = docker.from_env()
 success = {"status": "success"}
 error = {"status": "error"}
 
-check_label = "mcsm"
+check_label = "mchoster_default"
 
 server_limit = 10
 
@@ -93,7 +93,7 @@ def create_container(username):
     """
     vol = {username: {'bind': '/server', 'mode': 'rw'}} if username != None else False
     env = [f"OP_USERNAME={username}"] if username != None else False
-    return client.containers.run('mchoster-server:latest', mem_limit='1.5g', cpu_quota=100000, cpu_period= 100000,
+    return client.containers.run('mcserver:latest', mem_limit='1.5g', cpu_quota=100000, cpu_period= 100000,
                                  remove=True, detach=True, ports={'25565/tcp': None, '25565/udp': None},
                                  labels={check_label: '', 'username': username}, network=check_label,
                                  volumes=vol, environment=env)

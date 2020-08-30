@@ -2,6 +2,7 @@ version: "3"
 services:
   db:
     build: db
+    image: mchoster_db:latest
     environment:
       - MYSQL_DATABASE=web
       - MYSQL_USER=web
@@ -9,20 +10,20 @@ services:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
     volumes:
       - db:/var/lib/mysql
-    # networks:
-    #   - mcsm
   manager:
     build: manager
+    image: mchoster_manager:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    # networks:
-    #   - mcsm
-  mcserver:
-    build: mcserver
-
-
-# networks:
-#   mcsm:
+    # ports:
+    #   - "8080:80"
+  web:
+    build: web
+    image: mchoster_web:latest
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
 
 volumes:
   db:
