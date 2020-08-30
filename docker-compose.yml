@@ -1,0 +1,28 @@
+version: "3"
+services:
+  db:
+    build: db
+    environment:
+      - MYSQL_DATABASE=web
+      - MYSQL_USER=web
+      - MYSQL_PASSWORD=NotSoSecretPasswd
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+    volumes:
+      - db:/var/lib/mysql
+    # networks:
+    #   - mcsm
+  manager:
+    build: manager
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    # networks:
+    #   - mcsm
+  mcserver:
+    build: mcserver
+
+
+# networks:
+#   mcsm:
+
+volumes:
+  db:
