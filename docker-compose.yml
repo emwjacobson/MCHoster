@@ -1,8 +1,7 @@
 version: "3"
 services:
   db:
-    build: db
-    image: mchoster_db:latest
+    image: "mariadb:10.5"
     environment:
       - MYSQL_DATABASE=web
       - MYSQL_USER=web
@@ -23,6 +22,11 @@ services:
       - manager
     ports:
       - "8080:80"
+    volumes:
+      - static:/app/static
+  # nginx:
+  #   image: nginx:latest
 
 volumes:
   db:
+  static:

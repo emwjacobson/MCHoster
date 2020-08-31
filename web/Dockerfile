@@ -14,4 +14,6 @@ COPY manage.py .
 
 RUN python3 -m pip install -r requirements.txt
 
+RUN python3 manage.py collectstatic
+
 CMD gunicorn -w 4 -b 0.0.0.0:80 mcweb.wsgi
