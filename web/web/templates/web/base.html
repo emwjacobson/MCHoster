@@ -34,6 +34,11 @@
                 <li class="nav-item">
                     <a class="nav-link {% if path == request.path %}active{% endif %}" href="{{ path }}">Start a Server</a>
                 </li>
+
+                {% url 'manage' as path %}
+                <li class="nav-item">
+                    <a class="nav-link {% if path == request.path %}active{% endif %}" href="{{ path }}">Manage a Server</a>
+                </li>
             </ul>
             </div>
     </nav>

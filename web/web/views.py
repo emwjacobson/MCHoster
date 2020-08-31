@@ -34,3 +34,6 @@ def start(request):
     except Exception as e:
         print(e)
         return HttpResponseRedirect(reverse('index'))
+
+def manage(request):
+    return render(request, 'web/manage.html', {})
