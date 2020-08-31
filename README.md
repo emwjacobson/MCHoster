@@ -22,9 +22,15 @@ This will be the container that manages the databases. Still unimplemented.
 ## Requirements
 ### Software
 - Docker
+- Docker-compose
+- build-essential
 
 ### Hardware
 - ~1 core & ~1.5gb of ram per server you want to be able to host
 
 ## Running
-Things are still changing quickly. This will be updated with instructions once things become more stable.
+- Build mcserver image
+    - Can either be done using `make setup` or `docker build --pull --rm -t mcserver:latest mcserver`
+- Run `docker-compose up`
+    - Builds all container images and brings up the backend
+- Connect to the servers IP and have fun!

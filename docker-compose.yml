@@ -1,7 +1,7 @@
 version: "3"
 services:
   db:
-    image: "mariadb:10.5"
+    image: mariadb:10.5
     environment:
       - MYSQL_DATABASE=web
       - MYSQL_USER=web
@@ -23,7 +23,7 @@ services:
     volumes:
       - static:/app/static
   nginx:
-    image: nginx:latest
+    image: nginx:1.19
     depends_on:
       - web
     ports:
