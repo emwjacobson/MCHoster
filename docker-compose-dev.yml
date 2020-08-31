@@ -28,7 +28,7 @@ services:
       - 80:80
     volumes:
       - ./web:/app
-    command: "python3 manage.py runserver --insecure 0:80"
+    command: wait-for-it.sh db:3306 -- python3 manage.py runserver --insecure 0:80
 
 volumes:
   db:
