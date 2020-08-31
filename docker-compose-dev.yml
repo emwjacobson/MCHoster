@@ -1,0 +1,34 @@
+version: "3"
+services:
+  db:
+    image: mariadb:10.5
+    environment:
+      - MYSQL_DATABASE=web
+      - MYSQL_USER=web
+      - MYSQL_PASSWORD=NotSoSecretPasswd
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+    volumes:
+      - db:/var/lib/mysql
+  manager:
+    build: manager
+    image: mchoster_manager:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./manager:/manager
+    command: "flask run -h 0.0.0.0 -p 80 --debugger --reload"
+    ports:
+      - 8080:80
+  web:
+    build: web
+    image: mchoster_web:latest
+    depends_on:
+      - db
+      - manager
+    ports:
+      - 80:80
+    volumes:
+      - ./web:/app
+    command: "python3 manage.py runserver --insecure 0:80"
+
+volumes:
+  db:

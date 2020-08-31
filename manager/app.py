@@ -52,8 +52,8 @@ def get_online(container):
     Returns:
         int: The number of players on the server
     """
-    # If the server is <2 minutes old, just return 0. Chances are its still being setup and checking a server thats still starting causes a slowdown
-    if (datetime.now() - get_created(container)).total_seconds() < 120:
+    # If the server is <3 minutes old, just return 0. Chances are its still being setup and checking a server thats still starting causes a slowdown
+    if (datetime.now() - get_created(container)).total_seconds() < 180:
         return 0
     try:
         server = MinecraftServer.lookup(get_ip(container))
