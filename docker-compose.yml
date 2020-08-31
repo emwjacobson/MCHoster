@@ -15,13 +15,12 @@ services:
     image: mchoster_manager:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    # ports:
-    #   - "8080:80"
   web:
     build: web
     image: mchoster_web:latest
     depends_on:
       - db
+      - manager
     ports:
       - "8080:80"
 

@@ -22,6 +22,8 @@
 - Add pages
     - Stop server
     - Reset server
+- SSL
+- Set Django SECRET_KEY to environment variable
 
 ## Database
 - Use Docker secrets for the password

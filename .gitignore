@@ -4,3 +4,4 @@ __pycache__
 p3.6
 
 web/db.sqlite3
+web/static
