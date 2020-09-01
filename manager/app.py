@@ -12,7 +12,8 @@ client = docker.from_env()
 success = {"status": "success"}
 error = {"status": "error"}
 
-check_label = "mchoster_default"
+package_name "mchoster"
+check_label = package_name+"_default"
 
 server_limit = 10
 
@@ -189,6 +190,12 @@ def start_server(username=None):
                 **error,
                 "message": "Username too short"
             }
+
+    if username.startswith(package_name):
+        return {
+            **error,
+            "message": f"Username cannot start with {package_name}"
+        }
 
     try:
         containers = get_containers()
