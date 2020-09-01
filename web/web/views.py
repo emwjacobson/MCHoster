@@ -2,6 +2,7 @@ from django.shortcuts import render, HttpResponse, HttpResponseRedirect, reverse
 import requests
 import json
 from django.core.handlers.wsgi import WSGIRequest
+from django.conf import settings
 
 def get_endpoint(endpoint):
     res = requests.get(f'http://manager/{endpoint}')
@@ -26,14 +27,22 @@ def start(request):
     try:
         username = request.POST['username']
         res = get_endpoint(f'start/{username}')
-        print(res)
-        return render(request, 'web/start.html', {'view': 'response', 'data': res})
+        return render(request, 'web/start.html', {'data': res, 'server_ip': settings.SERVER_IP})
     except KeyError as e:
         # If 'username' doesnt exist in post, render normal page
-        return render(request, 'web/start.html', {'view': 'normal'})
+        return render(request, 'web/start.html', {})
     except Exception as e:
         print(e)
         return HttpResponseRedirect(reverse('index'))
 
 def manage(request):
-    return render(request, 'web/manage.html', {})
+    try:
+        c_id = request.POST['c_id']
+        print(request.POST)
+        res = get_endpoint(f'stop/{c_id}')
+        return render(request, 'web/manage.html', {'data': res})
+    except KeyError as e:
+        return render(request, 'web/manage.html', {})
+    except Exception as e:
+        print(e)
+        return HttpResponseRedirect(reverse('index'))

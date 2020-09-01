@@ -1,14 +1,39 @@
 {% extends "web/base.html" %}
 
-{% block title %}Manage - {{ block.super }}{% endblock title %}
+{% block title %}Start - {{ block.super }}{% endblock title %}
 
 {% block content %}
 <div class="card">
-    <h5 class="card-header">About</h5>
+    <h5 class="card-header">Manage a Server!</h5>
     <div class="card-body">
-        <h5 class="card-title">Hi there!</h5>
         <p class="card-text">
-            Welcome to MCHost! This is a little side project that I've been working on to create minecraft servers with the push of a button!
+            {% if data %}
+            <div class="col-lg-8 offset-2">
+                {% if data.status == 'success' %}
+                <div class="alert alert-success" role="alert">
+                    Success! {{ data.message|capfirst }}
+                </div>
+                {% elif data.status == 'error' %}
+                <div class="alert alert-danger" role="alert">
+                    Error: {{ data.message|capfirst }}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            <div class="col-lg-6 offset-3">
+                <form action="{% url 'manage' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-row col-lg-12">
+                        <div class="form-group col">
+                            <label for="c_id">Server ID</label>
+                            <input type="text" class="form-control" name="c_id" id="c_id">
+                        </div>
+                        <div class="form-group col-lg-12 text-center">
+                            <button type="submit" class="btn btn-danger" name="submit" value="stop">Stop Server</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </p>
     </div>
 </div>

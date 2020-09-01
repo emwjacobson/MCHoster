@@ -124,3 +124,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = './static'
+
+# Custom Settings
+
+SERVER_IP = '192.168.1.112'

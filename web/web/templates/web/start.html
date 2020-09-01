@@ -7,7 +7,25 @@
     <h5 class="card-header">Start a Server!</h5>
     <div class="card-body">
         <p class="card-text">
-        {% if view == 'normal' %}
+            {% if data %}
+            <div class="col-lg-8 offset-2">
+                {% if data.status == 'success' %}
+                <div class="alert alert-success" role="alert">
+                    Success! {{ data.message|capfirst }}
+                </div>
+                Server started at:
+                <p class="text-center"><b>{{ server_ip }}:{{ data.port }}</b></p>
+                Your server was started with ID:
+                <p class="text-center"><b>{{ data.id }}</b></p>
+                This ID is how you will stop the server when you are done in the <a href="{ url 'manage' }">manage</a> page.<br>
+                Alternatively, your server will stop automatically after 5 minutes if no players are online.<br>
+                {% elif data.status == 'error' %}
+                <div class="alert alert-danger" role="alert">
+                    Error: {{ data.message|capfirst }}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
             <div class="col-lg-6 offset-3">
                 <form action="{% url 'start' %}" method="POST">
                     {% csrf_token %}
@@ -22,17 +40,6 @@
                     </div>
                 </form>
             </div>
-        {% elif view == 'response' %}
-            <div class="col-lg-8 offset-2">
-                {% if data.status == 'success' %}
-                Message: {{ data.message }}<br>
-                ID: {{ data.id }}<br>
-                Port: {{ data.port }}
-                {% elif data.status == 'error' %}
-                Message: {{ data.message }}
-                {% endif %}
-            </div>
-        {% endif %}
         </p>
     </div>
 </div>
