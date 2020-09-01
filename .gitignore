@@ -5,3 +5,5 @@ p3.6
 
 web/db.sqlite3
 web/static
+
+docker-compose-prod.yml
