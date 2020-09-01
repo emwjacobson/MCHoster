@@ -18,7 +18,7 @@
                 Your server was started with ID:
                 <p class="text-center"><b>{{ data.id }}</b></p>
                 This ID is how you will stop the server when you are done in the <a href="{ url 'manage' }">manage</a> page.<br>
-                Alternatively, your server will stop automatically after 5 minutes if no players are online.<br>
+                Alternatively, your server will stop automatically after 10 minutes if no players are online.<br>
                 {% elif data.status == 'error' %}
                 <div class="alert alert-danger" role="alert">
                     Error: {{ data.message|capfirst }}
