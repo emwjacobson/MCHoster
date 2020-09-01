@@ -12,7 +12,7 @@ client = docker.from_env()
 success = {"status": "success"}
 error = {"status": "error"}
 
-package_name "mchoster"
+package_name = "mchoster"
 check_label = package_name+"_default"
 
 server_limit = 10
