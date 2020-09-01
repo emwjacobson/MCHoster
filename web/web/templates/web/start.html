@@ -25,7 +25,7 @@
                 </div>
                 {% endif %}
             </div>
-            {% endif %}
+            {% else %}
             <div class="col-lg-6 offset-3">
                 <form action="{% url 'start' %}" method="POST">
                     {% csrf_token %}
@@ -40,6 +40,7 @@
                     </div>
                 </form>
             </div>
+            {% endif %}
         </p>
     </div>
 </div>

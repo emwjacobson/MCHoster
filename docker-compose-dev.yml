@@ -32,7 +32,7 @@ services:
       - db
       - manager
     ports:
-      - 8080:80
+      - 8888:80
     volumes:
       - ./web:/app
     command: wait-for-it.sh db:3306 -- python3 manage.py runserver --insecure 0:80
