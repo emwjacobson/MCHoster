@@ -16,6 +16,8 @@ check_label = "mchoster_default"
 
 server_limit = 10
 
+min_age = 180
+
 # END Global Variables
 
 
@@ -53,7 +55,7 @@ def get_online(container):
         int: The number of players on the server
     """
     # If the server is <3 minutes old, just return 0. Chances are its still being setup and checking a server thats still starting causes a slowdown
-    if (datetime.now() - get_created(container)).total_seconds() < 180:
+    if (datetime.now() - get_created(container)).total_seconds() < min_age:
         return 0
     try:
         server = MinecraftServer.lookup(get_ip(container))
@@ -254,7 +256,7 @@ def stop_server(cid):
     try:
         container = client.containers.get(cid)
         if check_label in container.labels:
-            if (datetime.now() - get_created(container)).total_seconds() < 120:
+            if (datetime.now() - get_created(container)).total_seconds() < min_age:
                 return {
                     **error,
                     "message": "Container is too new to be stopped"
