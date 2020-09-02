@@ -9,6 +9,7 @@ services:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
     volumes:
       - db_dev:/var/lib/mysql
+    restart: unless-stopped
   manager:
     build: manager
     image: mchoster_manager:latest
@@ -18,6 +19,7 @@ services:
     command: "flask run -h 0.0.0.0 -p 80 --debugger --reload"
     ports:
       - 8080:80
+    restart: unless-stopped
   web:
     build: web
     image: mchoster_web:latest
@@ -37,6 +39,7 @@ services:
     volumes:
       - ./web:/app
     command: wait-for-it.sh db:3306 -- python3 manage.py runserver --insecure 0:80
+    restart: unless-stopped
 
 volumes:
   db_dev:
