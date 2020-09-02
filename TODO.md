@@ -5,6 +5,7 @@
 - Implement some kinda CI?
 
 ## Manager
+- Add settings to be environmental variables
 - Volumes - limit size?
 - If another container was started too recently, dont start a new one - prevents from overlapping CPU heavy tasks
 - If a volume hasent been used in >= 5 days(?) delete the volume to conserve space
@@ -19,6 +20,7 @@
     - Currently using docker-compose yaml to set
 - Add pages
     - Reset server
+- Favicon?
 
 ## Database
 - Use Docker secrets for the password?

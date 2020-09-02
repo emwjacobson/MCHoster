@@ -16,6 +16,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./manager:/manager
+    environment:
+      - MAX_SERVERS=10
     command: "flask run -h 0.0.0.0 -p 80 --debugger --reload"
     ports:
       - 8080:80

@@ -3,6 +3,7 @@ from flask import *
 from mcstatus import MinecraftServer
 from datetime import datetime
 import time
+import os
 
 # Global Variables
 
@@ -15,7 +16,7 @@ error = {"status": "error"}
 package_name = "mchoster"
 check_label = package_name+"_default"
 
-server_limit = 10
+server_limit = os.environ.get('MAX_SERVERS') if os.environ.get('MAX_SERVERS') is not None else 10
 
 min_age = 180
 
