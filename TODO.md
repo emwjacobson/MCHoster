@@ -15,12 +15,12 @@
 ## MCServer
 - When new version of MC is available, but existing volume exists (with old MC version), download new jar
 - Ability to select plugins?
+- Create eula file before first jar run?
 
 ## Web
 - Use Docker secrets for the db password?
     - Currently using docker-compose yaml to set
 - Add pages
-    - Stop server
     - Reset server
 
 ## Database

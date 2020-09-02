@@ -20,6 +20,7 @@ server_limit = 10
 min_age = 180
 
 port_range = "30000-31000"
+server_prefix = "serverfiles_"
 
 # END Global Variables
 
@@ -79,6 +80,10 @@ def get_created(container) -> datetime:
     pi = container.attrs['Created'].index(".")
     return datetime.strptime(container.attrs['Created'][0:pi], "%Y-%m-%dT%H:%M:%S")
 
+def get_created_volume(volume) -> datetime:
+    # Might be something like ISO 8601 to reduce the headache with this formatting
+    return datetime.strptime(volume.attrs['CreatedAt'], "%Y-%m-%dT%H:%M:%SZ")
+
 def get_containers():
     """Returns list of containers running MC Server
 
@@ -96,7 +101,7 @@ def create_container(username):
     Returns:
         Container: The mc server container
     """
-    vol = {username: {'bind': '/server', 'mode': 'rw'}} if username != None else False
+    vol = {server_prefix+username: {'bind': '/server', 'mode': 'rw'}} if username != None else False
     env = [f"OP_USERNAME={username}"] if username != None else False
     return client.containers.run('mcserver:latest', mem_limit='1.5g', cpu_quota=100000, cpu_period= 100000,
                                  remove=True, detach=True, ports={'25565/tcp': port_range, '25565/udp': port_range},
@@ -341,11 +346,18 @@ def index():
 # Intended to be used as a cron-job to clean up servers
 
 if __name__ == "__main__":
+    # # Will delete the volume after 5 days.
+    # # Note that its 5 days after Created, NOT Last Used
+    # for v in [v for v in client.volumes.list() if v.name.startswith(server_prefix)]:
+    #     diff = datetime.now() - get_created_volume(v)
+    #     total_seconds = diff.total_seconds()
+    #     if total_seconds > 60 * 60 * 24 * 5:
+    #         v.remove()
 
     for c in get_containers():
         diff = datetime.now() - get_created(c)
         total_seconds = diff.total_seconds()
-        if (total_seconds > 600):
+        if total_seconds > 600:
             try:
                 num_online = get_online(c)
 
