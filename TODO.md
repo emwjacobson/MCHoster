@@ -14,14 +14,16 @@
 
 ## MCServer
 - When new version of MC is available, but existing volume exists (with old MC version), download new jar
+- Ability to select plugins?
 
 ## Web
-- Use Docker secrets for the db password
+- Use Docker secrets for the db password?
+    - Currently using docker-compose yaml to set
 - Add pages
     - Stop server
     - Reset server
-- SSL
-- Set Django SECRET_KEY to environment variable
+- Fix mobile view
 
 ## Database
-- Use Docker secrets for the password
+- Use Docker secrets for the password?
+    - Currently using docker-compose yaml to set
