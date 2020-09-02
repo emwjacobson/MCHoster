@@ -347,7 +347,7 @@ def index():
 
 if __name__ == "__main__":
     # # Will delete the volume after 5 days.
-    # # Note that its 5 days after Created, NOT Last Used
+    # # Note that its 5 days after Created, NOT Last Used, bad implementation
     # for v in [v for v in client.volumes.list() if v.name.startswith(server_prefix)]:
     #     diff = datetime.now() - get_created_volume(v)
     #     total_seconds = diff.total_seconds()
