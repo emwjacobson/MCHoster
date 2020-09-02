@@ -182,7 +182,7 @@ def stats_container(cid):
             "message": "An error has occured"
         }
 
-@app.route('/start')
+@app.route('/start/')
 @app.route('/start/<username>')
 def start_server(username=None):
     if username != None:
@@ -193,11 +193,11 @@ def start_server(username=None):
                 "message": "Username too short"
             }
 
-    if username.startswith(package_name):
-        return {
-            **error,
-            "message": f"Username cannot start with {package_name}"
-        }
+        if username.startswith(package_name):
+            return {
+                **error,
+                "message": f"Username cannot start with {package_name}"
+            }
 
     try:
         containers = get_containers()

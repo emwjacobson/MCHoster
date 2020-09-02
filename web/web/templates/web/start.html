@@ -8,9 +8,8 @@
     <div class="card-body">
         <p class="card-text">
             <div class="row justify-content-center">
-                {% if data %}
+                {% if data and data.status == 'success' %}
                 <div class="col-lg-8">
-                    {% if data.status == 'success' %}
                     <div class="alert alert-success" role="alert">
                         Success! {{ data.message|capfirst }}
                     </div>
@@ -22,13 +21,15 @@
                     It is how you will stop the server when you are done in the <a href="{ url 'manage' }">manage</a> page.<br>
                     Alternatively, your server will stop automatically after 10 minutes if no players are online.<br>
                     <b>*NOTE:</b> If you restart a server with the same name, itll reuse the same map, <b>but the ID will be different</b>.
-                    {% elif data.status == 'error' %}
+                </div>
+                {% else %}
+                {% if data and data.status == 'error' %}
+                <div class="col-lg-8">
                     <div class="alert alert-danger" role="alert">
                         Error: {{ data.message|capfirst }}
                     </div>
-                    {% endif %}
                 </div>
-                {% else %}
+                {% endif %}
                 <div class="col-lg-6">
                     <form action="{% url 'start' %}" method="POST">
                         {% csrf_token %}

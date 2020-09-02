@@ -22,12 +22,13 @@ services:
     build: web
     image: mchoster_web:latest
     environment:
-      - SERVER_IP=192.168.1.112
+      - DEBUG=True
+      - SERVER_IP=192.168.1.111
       - MYSQL_DATABASE=web
       - MYSQL_USER=web
       - MYSQL_PASSWORD=NotSoSecretPasswd
       - SECRET_KEY=ChangeThisToALongRandomStringInProduction
-      - ALLOWED_HOSTS=192.168.1.112
+      - ALLOWED_HOSTS=192.168.1.111
     depends_on:
       - db
       - manager
