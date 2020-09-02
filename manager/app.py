@@ -159,7 +159,7 @@ def stats_container(cid):
     if len(cid) < 64:
         return {
             **error,
-            "message": "Invalid container id"
+            "message": "Invalid server id"
         }
 
     try:
@@ -236,7 +236,7 @@ def start_server(username=None):
         container.reload()
         return {
             **success,
-            "message": "Container started",
+            "message": "Server started",
             "id": container.id,
             "port": get_port(container)
         }
@@ -252,19 +252,10 @@ def start_server(username=None):
 def stop_server(cid):
     cid = escape(cid)
 
-    # TODO: Remove this in the future
-    if cid == 'all':
-        for c in get_containers():
-            stop_server(c.id)
-        return {
-            **success,
-            "message": "Servers stopping"
-        }
-
     if len(cid) < 64:
         return {
             **error,
-            "message": "Invalid container"
+            "message": "Invalid server ID"
         }
 
     try:
@@ -273,15 +264,15 @@ def stop_server(cid):
             if (datetime.now() - get_created(container)).total_seconds() < min_age:
                 return {
                     **error,
-                    "message": "Container is too new to be stopped"
+                    "message": "Server is too new to be stopped"
                 }
             stop_container(container)
             return {
                 **success,
-                "message": "Container stopped"
+                "message": "Server stopped"
             }
         else:
-            raise docker.errors.NotFound("", explanation=f"No such container: {cid}")
+            raise docker.errors.NotFound("", explanation=f"No such server: {cid}")
     except docker.errors.NotFound as e:
         return {
             **error,
@@ -362,7 +353,7 @@ if __name__ == "__main__":
                 num_online = get_online(c)
 
                 if num_online == 0:
-                    print("Stopping container for being alive too long without active players")
+                    print("Stopping server for being alive too long without active players")
                     stop_container(c)
             except ConnectionRefusedError as e:
                 print(f"Server {get_ip(c)} down?")
