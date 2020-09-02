@@ -7,40 +7,42 @@
     <h5 class="card-header">Start a Server!</h5>
     <div class="card-body">
         <p class="card-text">
-            {% if data %}
-            <div class="col-lg-8 offset-2">
-                {% if data.status == 'success' %}
-                <div class="alert alert-success" role="alert">
-                    Success! {{ data.message|capfirst }}
+            <div class="row justify-content-center">
+                {% if data %}
+                <div class="col-lg-8">
+                    {% if data.status == 'success' %}
+                    <div class="alert alert-success" role="alert">
+                        Success! {{ data.message|capfirst }}
+                    </div>
+                    Server started at:
+                    <p class="text-center"><b>{{ server_ip }}:{{ data.port }}</b></p>
+                    Your server was started with ID:
+                    <p class="text-center"><b>{{ data.id }}</b></p>
+                    This ID is how you will stop the server when you are done in the <a href="{ url 'manage' }">manage</a> page.<br>
+                    Alternatively, your server will stop automatically after 10 minutes if no players are online.<br>
+                    {% elif data.status == 'error' %}
+                    <div class="alert alert-danger" role="alert">
+                        Error: {{ data.message|capfirst }}
+                    </div>
+                    {% endif %}
                 </div>
-                Server started at:
-                <p class="text-center"><b>{{ server_ip }}:{{ data.port }}</b></p>
-                Your server was started with ID:
-                <p class="text-center"><b>{{ data.id }}</b></p>
-                This ID is how you will stop the server when you are done in the <a href="{ url 'manage' }">manage</a> page.<br>
-                Alternatively, your server will stop automatically after 10 minutes if no players are online.<br>
-                {% elif data.status == 'error' %}
-                <div class="alert alert-danger" role="alert">
-                    Error: {{ data.message|capfirst }}
+                {% else %}
+                <div class="col-lg-6">
+                    <form action="{% url 'start' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="form-row col-lg-12">
+                            <div class="form-group col">
+                                <label for="username">MC Username</label>
+                                <input type="text" class="form-control" name="username" id="username">
+                            </div>
+                            <div class="form-group col-lg-12 text-center">
+                                <button type="submit" class="btn btn-primary">Start Server!</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 {% endif %}
             </div>
-            {% else %}
-            <div class="col-lg-6 offset-3">
-                <form action="{% url 'start' %}" method="POST">
-                    {% csrf_token %}
-                    <div class="form-row col-lg-12">
-                        <div class="form-group col">
-                            <label for="username">MC Username</label>
-                            <input type="text" class="form-control" name="username" id="username">
-                        </div>
-                        <div class="form-group col-lg-12 text-center">
-                            <button type="submit" class="btn btn-primary">Start Server!</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            {% endif %}
         </p>
     </div>
 </div>

@@ -6,9 +6,21 @@
 <div class="card">
     <h5 class="card-header">About</h5>
     <div class="card-body">
-        <h5 class="card-title">Hi there!</h5>
+        <h3 class="card-title">Hi there!</h3>
         <p class="card-text">
-            Welcome to MCHost! This is a little side project that I've been working on to create minecraft servers with the push of a button!
+            <p>Welcome to MCHost! This is a little side project that I've been working on to create minecraft servers with the push of a button!</p>
+        </p>
+        <h3 class="card-title">How does it work?</h3>
+        <p class="card-text">
+            <p>
+                Using Docker, we are able to spin up individual containers with each one containing its own Minecraft server.
+                You can spin up your on on the <a href="{% url 'start' %}">start</a> page. When you do, you will be presented
+                with an IP of a Minecraft server. There will also be an ID that is used to stop the server when you are done.
+            </p>
+            <p>
+                To avoid hogs, servers are automatically stopped after 10 minutes when no players are online. There is no cap on time as long as There
+                is a player online, though there is a 10 minute AFK timer.
+            </p>
         </p>
     </div>
 </div>

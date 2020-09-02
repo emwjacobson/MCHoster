@@ -23,6 +23,7 @@
     - Stop server
     - Reset server
 - Fix mobile view
+- Implement DEBUG as Environmental variable, only true when set
 
 ## Database
 - Use Docker secrets for the password?
