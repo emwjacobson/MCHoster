@@ -1,7 +1,6 @@
 # Things I should do eventually
 
 ## General
-- Readme instructions
 - Per-component Readmes
 - Implement some kinda CI?
 
@@ -14,8 +13,7 @@
 
 ## MCServer
 - When new version of MC is available, but existing volume exists (with old MC version), download new jar
-- Ability to select plugins?
-- Create eula file before first jar run?
+- Ability to select plugins
 
 ## Web
 - Use Docker secrets for the db password?

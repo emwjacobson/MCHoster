@@ -5,7 +5,7 @@ services:
     environment:
       - MYSQL_DATABASE=web
       - MYSQL_USER=web
-      - MYSQL_PASSWORD=NotSoSecretPasswd
+      - MYSQL_PASSWORD=ChangeThisPassword
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
     volumes:
       - db:/var/lib/mysql
@@ -18,12 +18,12 @@ services:
     build: web
     image: mchoster_web:latest
     environment:
-      - SERVER_IP=192.168.1.112
+      - SERVER_IP=the.servers.ip
       - MYSQL_DATABASE=web
       - MYSQL_USER=web
-      - MYSQL_PASSWORD=NotSoSecretPasswd
+      - MYSQL_PASSWORD=ChangeThisPassword
       - SECRET_KEY=ChangeThisToALongRandomStringInProduction
-      - ALLOWED_HOSTS=192.168.1.112
+      - ALLOWED_HOSTS=your.website.com
     depends_on:
       - db
       - manager

@@ -6,10 +6,10 @@ up-dev:
 	docker-compose -f docker-compose-dev.yml up --build
 
 down:
-	docker-compose -f docker-compose-prod.yml down --rmi all -v
+	docker-compose -f docker-compose-prod.yml down --rmi all
 
 down-dev:
-	docker-compose -f docker-compose-dev.yml down --rmi all -v
+	docker-compose -f docker-compose-dev.yml down --rmi all
 
-setup:
+server:
 	docker build --pull --rm -t mcserver:latest mcserver
