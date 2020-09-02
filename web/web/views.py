@@ -38,7 +38,6 @@ def start(request):
 def manage(request):
     try:
         c_id = request.POST['c_id']
-        print(request.POST)
         res = get_endpoint(f'stop/{c_id}')
         return render(request, 'web/manage.html', {'data': res})
     except KeyError as e:

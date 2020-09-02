@@ -24,6 +24,8 @@
     - Reset server
 - Fix mobile view
 - Implement DEBUG as Environmental variable, only true when set
+- Error when not entering a username
+- Reshow text box when `start` page has error
 
 ## Database
 - Use Docker secrets for the password?
