@@ -21,6 +21,11 @@
                     {% endif %}
                 </div>
                 {% endif %}
+                <div class="col-lg-8">
+                    <p>
+                        This is where you will manage your server. You must use the ID from when the server was started.
+                    </p>
+                </div>
                 <div class="col-lg-6">
                     <form action="{% url 'manage' %}" method="POST">
                         {% csrf_token %}
