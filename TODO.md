@@ -7,9 +7,9 @@
 ## Manager
 - Add settings to be environmental variables
 - Volumes - limit size?
-- If another container was started too recently, dont start a new one - prevents from overlapping CPU heavy tasks
 - If a volume hasent been used in >= 5 days(?) delete the volume to conserve space
-- When resetting, check if container too new
+- When resetting, check if container too new?
+    - Check is normally to prevent world corruption, but if its being deleted, does it matter?
 
 ## MCServer
 - When new version of MC is available, but volume exists (with old MC version), download new jar

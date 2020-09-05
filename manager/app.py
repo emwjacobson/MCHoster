@@ -191,6 +191,17 @@ def stats_container(cid):
 @app.route('/start/')
 @app.route('/start/<username>')
 def start_server(username=None):
+    conts = get_containers()
+    if len(conts) > 0:
+        last = conts[0]
+        diff = datetime.now() - get_created(last)
+        # If last server was made less than 60 seconds ago, wait a bit before starting a new one
+        if diff.total_seconds() < 60:
+            return {
+                **error,
+                "message": f"Another server was created too recently. Please wait {60-diff.total_seconds():.0f} more seconds and try again."
+            }
+
     if username != None:
         username = escape(username)
         if len(username) < 5:
