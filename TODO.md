@@ -3,6 +3,7 @@
 ## General
 - Per-component Readmes
 - Implement some kinda CI?
+- Have Dockerfiles run as normal user
 
 ## Manager
 - Add settings to be environmental variables
