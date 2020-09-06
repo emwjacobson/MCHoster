@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', ''.join(random.choice(string.printable
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get('DEBUG', False))
 
-ENV_HOSTS = os.environ.get('ALLOWED_HOSTS')
+ENV_HOSTS = os.environ.get('ALLOWED_HOSTS', False)
 ALLOWED_HOSTS = ENV_HOSTS.split(',') if ENV_HOSTS else []
 
 
