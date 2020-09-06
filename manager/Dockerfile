@@ -34,5 +34,11 @@ RUN python3 -m pip install -r requirements.txt
 COPY data/server-cleaner /etc/cron.d/server-cleaner
 RUN chmod 0644 /etc/cron.d/server-cleaner
 RUN crontab /etc/cron.d/server-cleaner
+# RUN service cron start
 
-CMD cron && gunicorn -w 4 -b 0.0.0.0:80 app:app
+# RUN useradd user
+# RUN usermod -aG docker user
+
+# USER user
+
+CMD cron && gunicorn -w 4 -b 0.0.0.0:8000 app:app

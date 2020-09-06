@@ -123,7 +123,7 @@ def stop_container(container):
 
 # REST Endpoints
 
-@app.route('/stats')
+@app.route('/stats/')
 def stats():
     try:
         containers = get_containers()

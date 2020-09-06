@@ -18,9 +18,9 @@ services:
       - ./manager:/manager
     environment:
       - MAX_SERVERS=10
-    command: "flask run -h 0.0.0.0 -p 80 --debugger --reload"
+    command: "flask run -h 0.0.0.0 -p 8000 --debugger --reload"
     ports:
-      - 8080:80
+      - 8080:8000
     restart: unless-stopped
   web:
     build: web
@@ -37,10 +37,10 @@ services:
       - db
       - manager
     ports:
-      - 8888:80
+      - 8888:8000
     volumes:
       - ./web:/app
-    command: wait-for-it.sh db:3306 -- python3 manage.py runserver --insecure 0:80
+    command: wait-for-it.sh db:3306 -- python3 manage.py runserver --insecure 0:8000
     restart: unless-stopped
 
 volumes:
