@@ -23,6 +23,8 @@ RUN chmod +x /scripts/*
 
 RUN python3 -m pip install -r requirements.txt
 
+RUN python3 manage.py collectstatic
+
 RUN useradd user
 RUN chown -R user:user /app
 USER user
