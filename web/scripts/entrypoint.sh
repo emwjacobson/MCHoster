@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 python3 manage.py collectstatic
 
 wait-for-it.sh db:3306
