@@ -15,13 +15,13 @@ COPY requirements.txt .
 COPY mcweb mcweb
 COPY web web
 COPY manage.py .
+COPY scripts scripts
+RUN chmod -R +x scripts
 
 RUN python3 -m pip install -r requirements.txt
-
-RUN python3 manage.py collectstatic
 
 RUN useradd user
 RUN chown -R user:user /app
 USER user
 
-CMD wait-for-it.sh db:3306 -- gunicorn -w 4 -b 0.0.0.0:8000 mcweb.wsgi
+CMD ["scripts/entrpoint.sh"]
