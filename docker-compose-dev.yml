@@ -40,7 +40,6 @@ services:
       - 8888:8000
     volumes:
       - ./web:/app
-    command: wait-for-it.sh db:3306 -- python3 manage.py runserver --insecure 0:8000
     restart: unless-stopped
 
 volumes:

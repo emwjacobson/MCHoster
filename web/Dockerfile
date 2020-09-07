@@ -2,6 +2,8 @@ FROM python:3.6
 
 WORKDIR /app
 
+ENV PATH="/scripts:${PATH}"
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     default-libmysqlclient-dev \
     build-essential \
@@ -15,8 +17,9 @@ COPY requirements.txt .
 COPY mcweb mcweb
 COPY web web
 COPY manage.py .
-COPY scripts scripts
-RUN chmod -R +x scripts
+
+COPY scripts /scripts
+RUN chmod +x /scripts/*
 
 RUN python3 -m pip install -r requirements.txt
 
@@ -24,4 +27,4 @@ RUN useradd user
 RUN chown -R user:user /app
 USER user
 
-CMD ["scripts/entrpoint.sh"]
+CMD ["entrypoint.sh"]
