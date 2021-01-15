@@ -2,6 +2,7 @@ import time
 import os
 from datetime import datetime
 import docker
+from docker.models.services import Service
 from flask import Flask, escape
 from mcstatus import MinecraftServer
 
@@ -15,18 +16,17 @@ from mcstatus import MinecraftServer
 app = Flask(__name__)
 client = docker.from_env()
 
-success = {"status": "success"}
-error = {"status": "error"}
+response_success = {"status": "success"}
+response_error = {"status": "error"}
 
-package_name = "mchoster"
-check_label = package_name+"_default"
+check_label = "mchoster"
 
 # server_limit = int(os.environ.get('MAX_SERVERS')) if os.environ.get('MAX_SERVERS') is not None else 10
 
-min_age = 180
+# min_age = 180
 
-port_range = "30000-31000"
-server_prefix = "serverfiles_"
+# port_range = "30000-31000"
+# server_prefix = "serverfiles_"
 
 ###################################
 #
@@ -50,95 +50,105 @@ server_prefix = "serverfiles_"
 #
 ###################################
 
-def get_port(container):
-    """Returns the port that `container` is attached to on the host
+# def get_port(container):
+#     """Returns the port that `container` is attached to on the host
+
+#     Args:
+#         container (Container): The mc server container
+
+#     Returns:
+#         int: The port that the mc server is attached to on the host
+#     """
+#     return int(container.attrs['NetworkSettings']['Ports']['25565/tcp'][0]['HostPort'])
+
+# def get_ip(container):
+#     """Returns the IP address of `container`
+
+#     Args:
+#         container (Container): The mc server container
+
+#     Returns:
+#         str: IP Address of the container
+#     """
+#     return container.attrs['NetworkSettings']['Networks'][check_label]['IPAddress']
+
+# def get_online(container):
+#     """Gets the number of players online on a server
+
+#     Args:
+#         container (Container): The container to check the amount of players
+
+#     Returns:
+#         int: The number of players on the server
+#     """
+#     # If the server is <3 minutes old, just return 0. Chances are its still being setup and checking a server thats still starting causes a slowdown
+#     if (datetime.now() - get_created(container)).total_seconds() < min_age:
+#         return 0
+#     try:
+#         server = MinecraftServer.lookup(get_ip(container))
+#         return server.status().players.online
+#     except Exception as e:
+#         return 0
+
+def get_created(service: Service) -> datetime:
+    """Gets the datetime of when a service was created
 
     Args:
-        container (Container): The mc server container
+        service (Service): The service to find the time created of
 
     Returns:
-        int: The port that the mc server is attached to on the host
-    """
-    return int(container.attrs['NetworkSettings']['Ports']['25565/tcp'][0]['HostPort'])
-
-def get_ip(container):
-    """Returns the IP address of `container`
-
-    Args:
-        container (Container): The mc server container
-
-    Returns:
-        str: IP Address of the container
-    """
-    return container.attrs['NetworkSettings']['Networks'][check_label]['IPAddress']
-
-def get_online(container):
-    """Gets the number of players online on a server
-
-    Args:
-        container (Container): The container to check the amount of players
-
-    Returns:
-        int: The number of players on the server
-    """
-    # If the server is <3 minutes old, just return 0. Chances are its still being setup and checking a server thats still starting causes a slowdown
-    if (datetime.now() - get_created(container)).total_seconds() < min_age:
-        return 0
-    try:
-        server = MinecraftServer.lookup(get_ip(container))
-        return server.status().players.online
-    except Exception as e:
-        return 0
-
-def get_created(container) -> datetime:
-    """Gets the datetime of when a container was created
-
-    Args:
-        container (Container): The container to find the time created of
-
-    Returns:
-        datetime: The datetime object of when the container was created
+        datetime: The datetime object of when the service was created
     """
     # Might be something like ISO 8601 to reduce the headache with this formatting
-    pi = container.attrs['Created'].index(".")
-    return datetime.strptime(container.attrs['Created'][0:pi], "%Y-%m-%dT%H:%M:%S")
+    createdAt = service.attrs['CreatedAt']
+    pi = createdAt.index(".")
+    return datetime.strptime(createdAt[0:pi], "%Y-%m-%dT%H:%M:%S")
 
-def get_created_volume(volume) -> datetime:
-    # Might be something like ISO 8601 to reduce the headache with this formatting
-    return datetime.strptime(volume.attrs['CreatedAt'], "%Y-%m-%dT%H:%M:%SZ")
+# def get_created_volume(volume) -> datetime:
+#     # Might be something like ISO 8601 to reduce the headache with this formatting
+#     return datetime.strptime(volume.attrs['CreatedAt'], "%Y-%m-%dT%H:%M:%SZ")
 
-def get_containers():
-    """Returns list of containers running MC Server
-
-    Returns:
-        List: List of Containers, sorted from newest to oldest. list[0] is newest, list[-1] is oldest
-    """
-    return sorted(client.containers.list(filters={"label": [check_label]}), key=lambda x: get_created(x), reverse=True)
-
-def create_container(username):
-    """Created a new server container
-
-    Args:
-        username (string): The username for the OP user (unimplemented)
+def get_services():
+    """Returns list of services running MC Servers
 
     Returns:
-        Container: The mc server container
+        List: List of Services
     """
-    vol = {server_prefix+username: {'bind': '/server', 'mode': 'rw'}} if username != None else False
-    env = [f"OP_USERNAME={username}"] if username != None else False
-    return client.containers.run('mcserver:latest', mem_limit='1.5g', cpu_quota=100000, cpu_period= 100000,
-                                 remove=True, detach=True, ports={'25565/tcp': port_range, '25565/udp': port_range},
-                                 labels={check_label: '', 'username': username}, network=check_label,
-                                 volumes=vol, environment=env)
+    return client.services.list(filters={"label": [check_label]})
+    # return sorted(client.services.list(filters={"label": [check_label]}), key=lambda x: get_created(x), reverse=True)
 
-def stop_container(container):
-    """Stops `container`
+def get_nodes():
+    """Returns a list of nodes in the swarm
 
-    Args:
-        container (Container): The container you want to stop
+    Returns:
+        List: List of Nodes
     """
-    container.exec_run("/bin/sh -c 'kill $(pidof java)'", detach=True)
-    container.stop(timeout=30)
+    return client.nodes.list()
+
+# def create_container(username):
+#     """Created a new server container
+
+#     Args:
+#         username (string): The username for the OP user (unimplemented)
+
+#     Returns:
+#         Container: The mc server container
+#     """
+#     vol = {server_prefix+username: {'bind': '/server', 'mode': 'rw'}} if username != None else False
+#     env = [f"OP_USERNAME={username}"] if username != None else False
+#     return client.containers.run('mcserver:latest', mem_limit='1.5g', cpu_quota=100000, cpu_period= 100000,
+#                                  remove=True, detach=True, ports={'25565/tcp': port_range, '25565/udp': port_range},
+#                                  labels={check_label: '', 'username': username}, network=check_label,
+#                                  volumes=vol, environment=env)
+
+# def stop_container(container):
+#     """Stops `container`
+
+#     Args:
+#         container (Container): The container you want to stop
+#     """
+#     container.exec_run("/bin/sh -c 'kill $(pidof java)'", detach=True)
+#     container.stop(timeout=30)
 
 
 ###################################
@@ -160,220 +170,259 @@ def stop_container(container):
 ###################################
 
 
-@app.route('/stats/')
+@app.route('/stats/') # TODO: Port, Num Players
 def stats():
     try:
-        containers = get_containers()
+        services = get_services()
+        nodes = get_nodes()
 
-        return {
-            **success,
+        rtn = {
+            **response_success,
             "message": "",
-            "num_running": len(containers),
-            # "max_running": server_limit,
-            "servers": [{
-                "id": c.id,
-                "port": get_port(c),
-                "created": get_created(c),
-                "alive_for": (datetime.now() - get_created(c)).total_seconds(),
-                "num_players": get_online(c),
-                "username": c.labels['username']
-            } for c in containers]
+            "num_nodes": len(nodes),
+            "num_running": len(services),
+            "servers": []
         }
+
+        for service in services:
+            created = get_created(service)
+            rtn['servers'].append({
+                "id": service.id,
+                # "port": get_port(c),
+                "created": created,
+                "alive_for": (datetime.now() - created).total_seconds(),
+                # "num_players": get_online(c),
+                "username": service.labels['username']
+            })
+
+        return rtn
     except docker.errors.APIError as e:
         return {
-            **error,
+            **response_error,
             "message": e.explanation
         }
     except Exception as e:
         print(e)
         return {
-            **error,
-            "message": "An error has occured"
+            **response_error,
+            "message": "an error has occured"
         }
+    # try:
+    #     containers = get_containers()
 
-@app.route('/stats/<cid>')
+    #     return {
+    #         **success,
+    #         "message": "",
+    #         "num_running": len(containers),
+    #         # "max_running": server_limit,
+    #         "servers": [{
+    #             "id": c.id,
+    #             "port": get_port(c),
+    #             "created": get_created(c),
+    #             "alive_for": (datetime.now() - get_created(c)).total_seconds(),
+    #             "num_players": get_online(c),
+    #             "username": c.labels['username']
+    #         } for c in containers]
+    #     }
+    # except docker.errors.APIError as e:
+    #     return {
+    #         **error,
+    #         "message": e.explanation
+    #     }
+    # except Exception as e:
+    #     print(e)
+    #     return {
+    #         **error,
+    #         "message": "An error has occured"
+    #     }
+
+@app.route('/stats/<cid>') # TODO
 def stats_container(cid):
-    cid = escape(cid)
-    if len(cid) < 64:
-        return {
-            **error,
-            "message": "Invalid server id"
-        }
+    return
+    # cid = escape(cid)
+    # if len(cid) < 64:
+    #     return {
+    #         **error,
+    #         "message": "Invalid server id"
+    #     }
 
-    try:
-        container = client.containers.get(cid)
+    # try:
+    #     container = client.containers.get(cid)
 
-        return {
-            **success,
-            "message": "",
-            "id": cid,
-            "port": get_port(container),
-            "created": get_created(container),
-            "alive_for": (datetime.now() - get_created(container)).total_seconds(),
-            "num_players": get_online(container),
-            "username": container.labels['username']
-        }
-    except docker.errors.NotFound as e:
-        return {
-            **error,
-            "message": e.explanation
-        }
-    except Exception as e:
-        print(e)
-        return {
-            **error,
-            "message": "An error has occured"
-        }
+    #     return {
+    #         **success,
+    #         "message": "",
+    #         "id": cid,
+    #         "port": get_port(container),
+    #         "created": get_created(container),
+    #         "alive_for": (datetime.now() - get_created(container)).total_seconds(),
+    #         "num_players": get_online(container),
+    #         "username": container.labels['username']
+    #     }
+    # except docker.errors.NotFound as e:
+    #     return {
+    #         **error,
+    #         "message": e.explanation
+    #     }
+    # except Exception as e:
+    #     print(e)
+    #     return {
+    #         **error,
+    #         "message": "An error has occured"
+    #     }
 
-@app.route('/start/')
+@app.route('/start/') # TODO
 @app.route('/start/<username>')
 def start_server(username=None):
-    conts = get_containers()
-    if len(conts) > 0:
-        last = conts[0]
-        diff = datetime.now() - get_created(last)
-        # If last server was made less than 60 seconds ago, wait a bit before starting a new one
-        if diff.total_seconds() < 60:
-            return {
-                **error,
-                "message": f"Another server was created too recently. Please wait {60-diff.total_seconds():.0f} more seconds and try again."
-            }
+    return
+    # conts = get_containers()
+    # if len(conts) > 0:
+    #     last = conts[0]
+    #     diff = datetime.now() - get_created(last)
+    #     # If last server was made less than 60 seconds ago, wait a bit before starting a new one
+    #     if diff.total_seconds() < 60:
+    #         return {
+    #             **error,
+    #             "message": f"Another server was created too recently. Please wait {60-diff.total_seconds():.0f} more seconds and try again."
+    #         }
 
-    if username != None:
-        username = escape(username)
-        if len(username) < 5:
-            return {
-                **error,
-                "message": "Username too short"
-            }
+    # if username != None:
+    #     username = escape(username)
+    #     if len(username) < 5:
+    #         return {
+    #             **error,
+    #             "message": "Username too short"
+    #         }
 
-        if username.startswith(package_name):
-            return {
-                **error,
-                "message": f"Username cannot start with {package_name}"
-            }
+    #     if username.startswith(package_name):
+    #         return {
+    #             **error,
+    #             "message": f"Username cannot start with {package_name}"
+    #         }
 
-    try:
-        containers = get_containers()
-        # if len(containers) >= server_limit:
-        #     return {
-        #         **error,
-        #         "message": "Maximum amount of servers reached"
-        #     }
+    # try:
+    #     containers = get_containers()
+    #     # if len(containers) >= server_limit:
+    #     #     return {
+    #     #         **error,
+    #     #         "message": "Maximum amount of servers reached"
+    #     #     }
 
-        for c in containers:
-            if c.labels['username'] == username:
-                return {
-                    **error,
-                    "message": "A server with that username has already been started"
-                }
-    except docker.errors.APIError as e:
-        return {
-            **error,
-            "message": e.explanation
-        }
+    #     for c in containers:
+    #         if c.labels['username'] == username:
+    #             return {
+    #                 **error,
+    #                 "message": "A server with that username has already been started"
+    #             }
+    # except docker.errors.APIError as e:
+    #     return {
+    #         **error,
+    #         "message": e.explanation
+    #     }
 
-    try:
-        container = create_container(username)
-    except docker.errors.ImageNotFound as e:
-        return {
-            **error,
-            "message": e.explanation
-        }
+    # try:
+    #     container = create_container(username)
+    # except docker.errors.ImageNotFound as e:
+    #     return {
+    #         **error,
+    #         "message": e.explanation
+    #     }
 
-    try:
-        container.reload()
-        return {
-            **success,
-            "message": "Server started",
-            "id": container.id,
-            "port": get_port(container)
-        }
-    except Exception as e:
-        print(e)
-        container.stop()
-        return {
-            **error,
-            "message": "An error has occured"
-        }
+    # try:
+    #     container.reload()
+    #     return {
+    #         **success,
+    #         "message": "Server started",
+    #         "id": container.id,
+    #         "port": get_port(container)
+    #     }
+    # except Exception as e:
+    #     print(e)
+    #     container.stop()
+    #     return {
+    #         **error,
+    #         "message": "An error has occured"
+    #     }
 
-@app.route('/stop/<cid>')
+@app.route('/stop/<cid>') # TODO
 def stop_server(cid):
-    cid = escape(cid)
+    return
+    # cid = escape(cid)
 
-    if len(cid) < 64:
-        return {
-            **error,
-            "message": "Invalid server ID"
-        }
+    # if len(cid) < 64:
+    #     return {
+    #         **error,
+    #         "message": "Invalid server ID"
+    #     }
 
-    try:
-        container = client.containers.get(cid)
-        if check_label in container.labels:
-            if (datetime.now() - get_created(container)).total_seconds() < min_age:
-                return {
-                    **error,
-                    "message": "Server is too new to be stopped"
-                }
-            stop_container(container)
-            return {
-                **success,
-                "message": "Server stopped"
-            }
-        else:
-            raise docker.errors.NotFound("", explanation=f"No such server: {cid}")
-    except docker.errors.NotFound as e:
-        return {
-            **error,
-            "message": e.explanation
-        }
+    # try:
+    #     container = client.containers.get(cid)
+    #     if check_label in container.labels:
+    #         if (datetime.now() - get_created(container)).total_seconds() < min_age:
+    #             return {
+    #                 **error,
+    #                 "message": "Server is too new to be stopped"
+    #             }
+    #         stop_container(container)
+    #         return {
+    #             **success,
+    #             "message": "Server stopped"
+    #         }
+    #     else:
+    #         raise docker.errors.NotFound("", explanation=f"No such server: {cid}")
+    # except docker.errors.NotFound as e:
+    #     return {
+    #         **error,
+    #         "message": e.explanation
+    #     }
 
-@app.route('/reset/<username>')
+@app.route('/reset/<username>') # TODO
 def reset_server(username):
-    if username != None:
-        username = escape(username)
-        if len(username) < 5:
-            return {
-                **error,
-                "message": "Username too short"
-            }
+    return
+    # if username != None:
+    #     username = escape(username)
+    #     if len(username) < 5:
+    #         return {
+    #             **error,
+    #             "message": "Username too short"
+    #         }
 
-    # Stop any servers with the username if they are running
-    for c in get_containers():
-        if c.labels['username'] == username:
-            stop_container(c)
-            break
+    # # Stop any servers with the username if they are running
+    # for c in get_containers():
+    #     if c.labels['username'] == username:
+    #         stop_container(c)
+    #         break
 
-    # Make sure the volume for `username` exists
-    try:
-        vol = client.volumes.get(username)
-    except docker.errors.NotFound as e:
-        return {
-            **error,
-            "message": "Username not found"
-        }
-    except Exception as e:
-        print(e)
-        return {
-            **error,
-            "message": "There was an error"
-        }
+    # # Make sure the volume for `username` exists
+    # try:
+    #     vol = client.volumes.get(username)
+    # except docker.errors.NotFound as e:
+    #     return {
+    #         **error,
+    #         "message": "Username not found"
+    #     }
+    # except Exception as e:
+    #     print(e)
+    #     return {
+    #         **error,
+    #         "message": "There was an error"
+    #     }
 
-    # Finally remove the volume
-    try:
-        vol.reload()
-        vol.remove(force=True)
-    except Exception as e:
-        print(e)
-        return {
-            **error,
-            "message": "There was an error"
-        }
+    # # Finally remove the volume
+    # try:
+    #     vol.reload()
+    #     vol.remove(force=True)
+    # except Exception as e:
+    #     print(e)
+    #     return {
+    #         **error,
+    #         "message": "There was an error"
+    #     }
 
-    return {
-        **success,
-        "message": "Server has been reset"
-    }
+    # return {
+    #     **success,
+    #     "message": "Server has been reset"
+    # }
 
 @app.route('/')
 def index():
@@ -403,23 +452,17 @@ def index():
 # Intended to be used as a cron-job to clean up servers
 
 if __name__ == "__main__":
-    # # Will delete the volume after 5 days.
-    # # Note that its 5 days after Created, NOT Last Used, bad implementation
-    # for v in [v for v in client.volumes.list() if v.name.startswith(server_prefix)]:
-    #     diff = datetime.now() - get_created_volume(v)
+    # TODO: Reimplement container pruning
+    # for c in get_containers():
+    #     diff = datetime.now() - get_created(c)
     #     total_seconds = diff.total_seconds()
-    #     if total_seconds > 60 * 60 * 24 * 5:
-    #         v.remove()
+    #     if total_seconds > 600:
+    #         try:
+    #             num_online = get_online(c)
 
-    for c in get_containers():
-        diff = datetime.now() - get_created(c)
-        total_seconds = diff.total_seconds()
-        if total_seconds > 600:
-            try:
-                num_online = get_online(c)
-
-                if num_online == 0:
-                    print("Stopping server for being alive too long without active players")
-                    stop_container(c)
-            except ConnectionRefusedError as e:
-                print(f"Server {get_ip(c)} down?")
+    #             if num_online == 0:
+    #                 print("Stopping server for being alive too long without active players")
+    #                 stop_container(c)
+    #         except ConnectionRefusedError as e:
+    #             print(f"Server {get_ip(c)} down?")
+    pass
