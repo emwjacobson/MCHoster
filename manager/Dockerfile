@@ -4,7 +4,7 @@ ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         apt-transport-https \
         ca-certificates \
         curl \
@@ -14,7 +14,7 @@ RUN apt-get update && \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" && \
     apt-get update && \
-    apt-get install -y --no-install-recommends \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         docker-ce \
         docker-ce-cli \
         containerd.io \
@@ -29,7 +29,6 @@ WORKDIR /manager
 COPY app.py .
 COPY requirements.txt .
 
-RUN pip3 install --upgrade pip
 RUN python3 -m pip install -r requirements.txt
 
 COPY data/server-cleaner /etc/cron.d/server-cleaner
@@ -41,5 +40,7 @@ RUN crontab /etc/cron.d/server-cleaner
 # RUN usermod -aG docker user
 
 # USER user
+
+EXPOSE 8000
 
 CMD cron && gunicorn -w 4 -b 0.0.0.0:8000 app:app

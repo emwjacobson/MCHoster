@@ -1,9 +1,9 @@
-import docker
-from flask import *
-from mcstatus import MinecraftServer
-from datetime import datetime
 import time
 import os
+from datetime import datetime
+import docker
+from flask import Flask, escape
+from mcstatus import MinecraftServer
 
 # Global Variables
 
