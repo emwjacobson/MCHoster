@@ -1,5 +1,10 @@
 # MCHoster
 
+### **NOTE: Below documentation refers to v1 of the project. It has not yet been updated to reflect the changes in version 2.**
+
+---
+
+
 ## About
 The goal of this project was to make an on demand minecraft server hosting website where users would be able to spin up servers on command.
 

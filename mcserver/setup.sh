@@ -1,6 +1,6 @@
 # Download and accept EULA
 if [ ! -f server.jar ]; then
-    wget https://papermc.io/api/v1/paper/${MC_VERSION}/${PAPER_BUILD}/download -O server.jar
+    wget ${PAPER_DOWNLOAD_URL} -O server.jar
     echo "eula=true" > eula.txt
 fi
 
