@@ -16,7 +16,7 @@ error = {"status": "error"}
 package_name = "mchoster"
 check_label = package_name+"_default"
 
-server_limit = int(os.environ.get('MAX_SERVERS')) if os.environ.get('MAX_SERVERS') is not None else 10
+# server_limit = int(os.environ.get('MAX_SERVERS')) if os.environ.get('MAX_SERVERS') is not None else 10
 
 min_age = 180
 
@@ -132,7 +132,7 @@ def stats():
             **success,
             "message": "",
             "num_running": len(containers),
-            "max_running": server_limit,
+            # "max_running": server_limit,
             "servers": [{
                 "id": c.id,
                 "port": get_port(c),
@@ -218,11 +218,11 @@ def start_server(username=None):
 
     try:
         containers = get_containers()
-        if len(containers) >= server_limit:
-            return {
-                **error,
-                "message": "Maximum amount of servers reached"
-            }
+        # if len(containers) >= server_limit:
+        #     return {
+        #         **error,
+        #         "message": "Maximum amount of servers reached"
+        #     }
 
         for c in containers:
             if c.labels['username'] == username:

@@ -1,3 +1,14 @@
 version: "3"
 
 services:
+  manager:
+    build: manager
+    image: mchoster_manager:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"
+      restart_policy:
+        window: 120s

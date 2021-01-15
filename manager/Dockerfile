@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
@@ -29,6 +29,7 @@ WORKDIR /manager
 COPY app.py .
 COPY requirements.txt .
 
+RUN pip3 install --upgrade pip
 RUN python3 -m pip install -r requirements.txt
 
 COPY data/server-cleaner /etc/cron.d/server-cleaner
