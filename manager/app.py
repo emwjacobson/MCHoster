@@ -5,7 +5,12 @@ import docker
 from flask import Flask, escape
 from mcstatus import MinecraftServer
 
+###################################
+#
 # Global Variables
+#
+###################################
+
 
 app = Flask(__name__)
 client = docker.from_env()
@@ -23,10 +28,27 @@ min_age = 180
 port_range = "30000-31000"
 server_prefix = "serverfiles_"
 
+###################################
+#
 # END Global Variables
+#
+###################################
 
 
+
+
+
+
+
+
+
+
+
+###################################
+#
 # Helper Functions
+#
+###################################
 
 def get_port(container):
     """Returns the port that `container` is attached to on the host
@@ -118,10 +140,25 @@ def stop_container(container):
     container.exec_run("/bin/sh -c 'kill $(pidof java)'", detach=True)
     container.stop(timeout=30)
 
+
+###################################
+#
 # END Helper Functions
+#
+###################################
 
 
+
+
+
+
+
+###################################
+#
 # REST Endpoints
+#
+###################################
+
 
 @app.route('/stats/')
 def stats():
@@ -342,7 +379,24 @@ def reset_server(username):
 def index():
     return "", 404
 
+
+###################################
+#
 # END REST Endpoints
+#
+###################################
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # This code is ran when the program is run as pure python.
