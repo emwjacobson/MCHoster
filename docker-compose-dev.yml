@@ -2,8 +2,7 @@ version: "3"
 
 services:
   manager:
-    build: manager
-    image: mchoster_manager:latest
+    image: emwjacobson/mchoster_manager:latest
     environment:
       STACK_NAME: 'mchoster'
     volumes:

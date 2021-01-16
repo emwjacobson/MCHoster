@@ -448,7 +448,7 @@ if __name__ == "__main__":
     for service in get_services():
         diff = datetime.now() - get_created(service)
         total_seconds = diff.total_seconds()
-        if total_seconds > 100:
+        if total_seconds > 600:
             try:
                 num_online = get_online(service)
 

@@ -1,5 +1,8 @@
 # MCHoster
 
+## Running
+
+
 ### **NOTE: Below documentation refers to v1 of the project. It has not yet been updated to reflect the changes in version 2.**
 
 ---
