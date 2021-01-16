@@ -8,11 +8,24 @@ services:
       STACK_NAME: 'mchoster'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./manager:/manager
     ports:
       - "8000:8000"
+    command: gunicorn -b 0.0.0.0:8000 --reload app:app
     deploy:
       placement:
         constraints:
           - "node.role==manager"
       restart_policy:
         window: 120s
+
+  viz:
+    image: dockersamples/visualizer
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"

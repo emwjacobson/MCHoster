@@ -1,5 +1,6 @@
 import time
 import os
+import socket
 from datetime import datetime
 import docker
 from docker.models.services import Service
@@ -16,22 +17,21 @@ from mcstatus import MinecraftServer
 
 app = Flask(__name__)
 client = docker.from_env()
+client.networks.prune()
 
 response_success = {"status": "success"}
 response_error = {"status": "error"}
 
-check_label = "mchoster"
+stack_name = os.environ.get('STACK_NAME')
 
 # server_limit = int(os.environ.get('MAX_SERVERS')) if os.environ.get('MAX_SERVERS') is not None else 10
 server_per_node = 3
 
-min_age = 180
+min_age = 60
 
 port_min = 30000
 port_max = 32000
 port_last = port_min
-
-port_range = "30000-32000"
 
 # server_prefix = "serverfiles_"
 
@@ -66,6 +66,7 @@ def get_port(service: Service):
     Returns:
         int: The port that the mc server is attached to on the host
     """
+    print(service.attrs)
     return int(service.attrs['Endpoint']['Ports'][0]['PublishedPort'])
 
 # def get_ip(service: Service):
@@ -79,23 +80,27 @@ def get_port(service: Service):
 #     """
 #     return service.attrs['NetworkSettings']['Networks'][check_label]['IPAddress']
 
-# def get_online(service: Service):
-#     """Gets the number of players online on a server
+def get_online(service: Service):
+    """Gets the number of players online on a server
 
-#     Args:
-#         service (Service): The service to check the amount of players
+    Args:
+        service (Service): The service to check the amount of players
 
-#     Returns:
-#         int: The number of players on the server
-#     """
-#     # If the server is <3 minutes old, just return 0. Chances are its still being setup and checking a server thats still starting causes a slowdown
-#     if (datetime.now() - get_created(service)).total_seconds() < min_age:
-#         return 0
-#     try:
-#         server = MinecraftServer.lookup(get_ip(service))
-#         return server.status().players.online
-#     except Exception as e:
-#         return 0
+    Returns:
+        int: The number of players on the server
+    """
+    # If the server is <3 minutes old, just return 0. Chances are its still being setup and checking a server thats still starting causes a slowdown
+    if (datetime.now() - get_created(service)).total_seconds() < min_age:
+        return -1
+    try:
+        service.reload()
+        ip = service.name + ":25565"
+        print(ip)
+        server = MinecraftServer.lookup(ip)
+        return server.status().players.online
+    except Exception as e:
+        print(e)
+        return -2
 
 def get_created(service: Service) -> datetime:
     """Gets the datetime of when a service was created
@@ -121,7 +126,7 @@ def get_services():
     Returns:
         List: List of Services
     """
-    return client.services.list(filters={"label": [check_label]})
+    return client.services.list(filters={"label": [stack_name]})
     # return sorted(client.services.list(filters={"label": [check_label]}), key=lambda x: get_created(x), reverse=True)
 
 def get_nodes():
@@ -152,7 +157,7 @@ def create_service(username):
         port_last = port_min
 
     return client.services.create('emwjacobson/mcserver:latest', endpoint_spec=EndpointSpec(ports={port_last: (25565, "tcp")}),
-                                 labels={check_label: '', 'username': username}, env=env)
+                                 labels={stack_name: '', 'username': username}, env=env, networks=[stack_name+"_default"])
     # return client.containers.run('emwjacobson/mcserver:latest', mem_limit='1.5g', cpu_quota=100000, cpu_period=100000,
     #                              remove=True, detach=True, ports={'25565/tcp': port_range, '25565/udp': port_range},
     #                              labels={check_label: '', 'username': username}, network=check_label,
@@ -187,7 +192,7 @@ def stop_service(service: Service):
 ###################################
 
 
-@app.route('/stats/') # TODO: Num Players
+@app.route('/stats/')
 def stats():
     try:
         services = get_services()
@@ -208,7 +213,7 @@ def stats():
                 "port": get_port(service),
                 "created": created,
                 "alive_for": (datetime.now() - created).total_seconds(),
-                # "num_players": get_online(c),
+                "num_players": get_online(service),
                 "username": service.attrs['Spec']['Labels']['username']
             })
 
@@ -271,7 +276,7 @@ def start_server(username=None):
         # If newest server was made less than 60 seconds ago, wait a bit before starting a new one
         if diff.total_seconds() < 60:
             return {
-                **services,
+                **response_error,
                 "message": f"Another server was created too recently. Please wait {60-diff.total_seconds():.0f} more seconds and try again."
             }
 
@@ -283,10 +288,10 @@ def start_server(username=None):
                 "message": "Username too short"
             }
 
-        if username.startswith(check_label):
+        if username.startswith(stack_name):
             return {
                 **response_error,
-                "message": f"Username cannot start with {check_label}"
+                "message": f"Username cannot start with {stack_name}"
             }
 
     try:
@@ -345,7 +350,7 @@ def stop_server(service_id):
 
     try:
         service = client.services.get(service_id)
-        if check_label in service.attrs['Spec']['Labels']:
+        if stack_name in service.attrs['Spec']['Labels']:
             if (datetime.now() - get_created(service)).total_seconds() < min_age:
                 return {
                     **response_error,
@@ -357,7 +362,7 @@ def stop_server(service_id):
                 "message": "Server stopped"
             }
         else:
-            raise docker.errors.NotFound("", explanation=f"No such server: {cid}")
+            raise docker.errors.NotFound("", explanation=f"No such server: {service_id}")
     except docker.errors.NotFound as e:
         return {
             **response_error,
@@ -440,17 +445,15 @@ def index():
 # Intended to be used as a cron-job to clean up servers
 
 if __name__ == "__main__":
-    # TODO: Reimplement service pruning
-    # for c in get_services():
-    #     diff = datetime.now() - get_created(c)
-    #     total_seconds = diff.total_seconds()
-    #     if total_seconds > 600:
-    #         try:
-    #             num_online = get_online(c)
+    for service in get_services():
+        diff = datetime.now() - get_created(service)
+        total_seconds = diff.total_seconds()
+        if total_seconds > 100:
+            try:
+                num_online = get_online(service)
 
-    #             if num_online == 0:
-    #                 print("Stopping server for being alive too long without active players")
-    #                 stop_service(c)
-    #         except ConnectionRefusedError as e:
-    #             print(f"Server {get_ip(c)} down?")
-    pass
+                if num_online == 0:
+                    print("Stopping server for being alive too long without active players")
+                    stop_service(service)
+            except ConnectionRefusedError as e:
+                print(f"Server {service.name} down?")
