@@ -26,7 +26,6 @@ services:
     ports:
       - 8888:8000
     volumes:
-      - static:/app/static
       - ./web:/app
     depends_on:
       - manager
@@ -45,8 +44,3 @@ services:
       placement:
         constraints:
           - "node.role==manager"
-
-volumes:
-  static:
-    driver: glusterfs
-    name: "docker_gfs/static"

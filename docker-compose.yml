@@ -18,11 +18,11 @@ services:
     environment:
       - SERVER_IP=the.servers.ip
       - SECRET_KEY=ChangeThisToALongRandomStringInProduction
-      - ALLOWED_HOSTS=*
+      - ALLOWED_HOSTS=your.website.com
     volumes:
       - static:/app/static
     deploy:
-      replicas: 3
+      replicas: 2
 
   nginx:
     image: emwjacobson/mchoster_nginx:latest
@@ -32,17 +32,6 @@ services:
       - static:/serve/static
     deploy:
       replicas: 2
-
-  viz:
-    image: dockersamples/visualizer
-    ports:
-      - "8080:8080"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    deploy:
-      placement:
-        constraints:
-          - "node.role==manager"
 
 volumes:
   static:
