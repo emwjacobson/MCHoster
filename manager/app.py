@@ -3,6 +3,7 @@ import os
 import socket
 from datetime import datetime
 import docker
+from random import randint
 from docker.models.services import Service
 from docker.types import Resources, EndpointSpec
 from flask import Flask, escape
@@ -27,11 +28,11 @@ stack_name = os.environ.get('STACK_NAME')
 # server_limit = int(os.environ.get('MAX_SERVERS')) if os.environ.get('MAX_SERVERS') is not None else 10
 server_per_node = 3
 
-min_age = 60
+min_age = 90
 
 port_min = 30000
 port_max = 32000
-port_last = port_min
+# port_last = port_min
 
 # server_prefix = "serverfiles_"
 
@@ -148,15 +149,16 @@ def create_service(username):
     Returns:
         Service: The mc server service
     """
-    global port_last
+    # global port_last
 
     # vol = {check_label+"_user_"+username: {'bind': '/server', 'mode': 'rw'}} if username != None else False
     env = [f"OP_USERNAME={username}"] if username != None else [f"OP_USERNAME="]
-    port_last = port_last + 1
-    if port_last > port_max:
-        port_last = port_min
+    # port_last = port_last + 1
+    # if port_last > port_max:
+    #     port_last = port_min
+    port = randint(port_min, port_max)
 
-    return client.services.create('emwjacobson/mcserver:latest', endpoint_spec=EndpointSpec(ports={port_last: (25565, "tcp")}),
+    return client.services.create('emwjacobson/mcserver:latest', endpoint_spec=EndpointSpec(ports={port: (25565, "tcp")}),
                                  labels={stack_name: '', 'username': username}, env=env, networks=[stack_name+"_default"])
     # return client.containers.run('emwjacobson/mcserver:latest', mem_limit='1.5g', cpu_quota=100000, cpu_period=100000,
     #                              remove=True, detach=True, ports={'25565/tcp': port_range, '25565/udp': port_range},

@@ -7,7 +7,6 @@ services:
       STACK_NAME: 'mchoster'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: gunicorn -b 0.0.0.0:8000 --reload app:app
     deploy:
       placement:
         constraints:
