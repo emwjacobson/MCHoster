@@ -1,4 +1,4 @@
-version: "3"
+version: "3.4"
 
 services:
   manager:
@@ -7,21 +7,44 @@ services:
       STACK_NAME: 'mchoster'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    command: gunicorn -b 0.0.0.0:8000 --reload app:app
     deploy:
       placement:
         constraints:
           - "node.role==manager"
-      restart_policy:
-        window: 120s
 
   web:
-    build: web
-    image: mchoster_web:latest
+    image: emwjacobson/mchoster_web:latest
     environment:
       - SERVER_IP=the.servers.ip
       - SECRET_KEY=ChangeThisToALongRandomStringInProduction
-      - ALLOWED_HOSTS=your.website.com
+      - ALLOWED_HOSTS=*
+    volumes:
+      - static:/app/static
+    deploy:
+      replicas: 3
+
+  nginx:
+    image: emwjacobson/mchoster_nginx:latest
     ports:
-      - 8888:8000
-    depends_on:
-      - manager
+      - "80:80"
+    volumes:
+      - static:/serve/static
+    deploy:
+      replicas: 2
+
+  viz:
+    image: dockersamples/visualizer
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"
+
+volumes:
+  static:
+    driver: glusterfs
+    name: "docker_gfs/static"

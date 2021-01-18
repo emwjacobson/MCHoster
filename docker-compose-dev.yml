@@ -15,8 +15,6 @@ services:
       placement:
         constraints:
           - "node.role==manager"
-      restart_policy:
-        window: 120s
 
   web:
     image: emwjacobson/mchoster_web:latest
