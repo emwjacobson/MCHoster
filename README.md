@@ -8,6 +8,8 @@ https://medium.com/running-a-software-factory/setup-3-node-high-availability-clu
 GlusterFS docker volume plugin
 https://github.com/marcelo-ochoa/docker-volume-plugins/tree/master/glusterfs-volume-plugin
 
+Development should be done in a swarm consisting of **one** manager and any number of workers. All of the core services will be assigned to that manager. There are local directories that need to be mounted to make sure that files are updated inside of the containers.
+
 
 ### **NOTE: Below documentation refers to v1 of the project. It has not yet been updated to reflect the changes in version 2.**
 

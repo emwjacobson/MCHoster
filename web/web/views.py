@@ -20,13 +20,29 @@ def stats(request):
         print(e)
         return render(request, 'web/stats.html', context={'stats': {'status': 'error', 'message': 'Error with backend manager'}})
 
-    stats = {'stats': res, 'total_players': sum(ser['num_players'] for ser in res['servers'])}
+    # res = {
+    #     "message":"",
+    #     "num_nodes":3,
+    #     "num_running":0,
+    #     "servers":[],
+    #     "status":"success"
+    #     "num_players": XXXX
+    #     }
+    stats = {'stats': res, 'total_players': sum((ser['num_players'] if ser['num_players'] > 0 else 0) for ser in res['servers'])}
     return render(request, 'web/stats.html', context=stats)
 
 def start(request):
     try:
         username = request.POST['username']
         res = get_endpoint(f'start/{username}')
+
+        # res = {
+        #     "id":"iy8f9wyqm9zyievi50rnal8e8",
+        #     "message":"Server started",
+        #     "port":30001,
+        #     "status":"success"
+        #     }
+
         return render(request, 'web/start.html', {'data': res, 'server_ip': settings.SERVER_IP})
     except KeyError as e:
         # If 'username' doesnt exist in post, render normal page

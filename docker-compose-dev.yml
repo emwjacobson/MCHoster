@@ -29,7 +29,7 @@ services:
       - 8888:8000
     volumes:
       - static:/app/static
-      # - ./web:/app
+      - ./web:/app
     depends_on:
       - manager
     deploy:
