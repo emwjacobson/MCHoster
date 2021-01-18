@@ -26,7 +26,7 @@ response_error = {"status": "error"}
 stack_name = os.environ.get('STACK_NAME')
 
 # server_limit = int(os.environ.get('MAX_SERVERS')) if os.environ.get('MAX_SERVERS') is not None else 10
-server_per_node = 3
+# server_per_node = 3
 
 min_age = 90
 
@@ -232,7 +232,7 @@ def stats():
             "message": "an error has occured"
         }
 
-@app.route('/stats/<cid>') # TODO
+@app.route('/stats/<cid>') # TODO: This was never implemented in v1, so no need to reimplement yet.
 def stats_service(cid):
     return
     # cid = escape(cid)
@@ -298,11 +298,11 @@ def start_server(username=None):
 
     try:
         services = get_services()
-        if len(services) >= server_per_node * len(get_nodes()):
-            return {
-                **response_error,
-                "message": "Maximum amount of servers reached"
-            }
+        # if len(services) >= server_per_node * len(get_nodes()):
+        #     return {
+        #         **response_error,
+        #         "message": "Maximum amount of servers reached"
+        #     }
 
         for service in services:
             if service.attrs['Spec']['Labels']['username'] == username:
@@ -345,7 +345,7 @@ def start_server(username=None):
             "message": "An error has occured"
         }
 
-@app.route('/stop/<service_id>') # TODO
+@app.route('/stop/<service_id>')
 def stop_server(service_id):
     service_id = escape(service_id)
 
@@ -376,7 +376,7 @@ def stop_server(service_id):
             "message": e.explanation
         }
 
-@app.route('/reset/<username>') # TODO
+@app.route('/reset/<username>') # TODO: This was never implemented in v1, so no need to reimplement yet.
 def reset_server(username):
     return
     # if username != None:
