@@ -13,3 +13,15 @@ services:
           - "node.role==manager"
       restart_policy:
         window: 120s
+
+  web:
+    build: web
+    image: mchoster_web:latest
+    environment:
+      - SERVER_IP=the.servers.ip
+      - SECRET_KEY=ChangeThisToALongRandomStringInProduction
+      - ALLOWED_HOSTS=your.website.com
+    ports:
+      - 8888:8000
+    depends_on:
+      - manager

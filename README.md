@@ -2,6 +2,12 @@
 
 ## Running
 
+Setup GlusterFS across nodes
+https://medium.com/running-a-software-factory/setup-3-node-high-availability-cluster-with-glusterfs-and-docker-swarm-b4ff80c6b5c3
+
+GlusterFS docker volume plugin
+https://github.com/marcelo-ochoa/docker-volume-plugins/tree/master/glusterfs-volume-plugin
+
 
 ### **NOTE: Below documentation refers to v1 of the project. It has not yet been updated to reflect the changes in version 2.**
 

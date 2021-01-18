@@ -321,6 +321,11 @@ def start_server(username=None):
             **response_error,
             "message": e.explanation
         }
+    except docker.errors.APIError as e:
+        return {
+            **response_error,
+            "message": "Error, please try again. Port might already be in use."
+        }
 
     try:
         service.reload()

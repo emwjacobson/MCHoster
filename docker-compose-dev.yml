@@ -1,4 +1,4 @@
-version: "3"
+version: "3.4"
 
 services:
   manager:
@@ -18,6 +18,25 @@ services:
       restart_policy:
         window: 120s
 
+  web:
+    image: emwjacobson/mchoster_web:latest
+    environment:
+      - DEBUG=True
+      - SERVER_IP=the.servers.ip
+      - SECRET_KEY=ChangeThisToALongRandomStringInProduction
+      - ALLOWED_HOSTS=*
+    ports:
+      - 8888:8000
+    volumes:
+      - static:/app/static
+      # - ./web:/app
+    depends_on:
+      - manager
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"
+
   viz:
     image: dockersamples/visualizer
     ports:
@@ -28,3 +47,8 @@ services:
       placement:
         constraints:
           - "node.role==manager"
+
+volumes:
+  static:
+    driver: glusterfs
+    name: "docker_gfs/static"
