@@ -11,7 +11,7 @@
             Hmm, looks like there was an error fetching stats...<br>
             {{ stats.message }}
         {% elif stats.status|lower == 'success' %}
-            There is currently {{ stats.num_running }} running server{{ stats.num_running|pluralize }} out of {{ stats.max_running }}.<br>
+            There is currently {{ stats.num_running }} running server{{ stats.num_running|pluralize }} across {{ stats.num_nodes }} node{{ stats.num_nodes|pluralize }}.<br>
             There are a total of {{ total_players }} players!
         {% endif %}
         </p>
@@ -21,7 +21,7 @@
                 {% for cont in stats.servers %}
                 <div class="col-lg-3" style="padding-top:10px;">
                     <div class="card">
-                        <div class="card-header">Server {{ cont.id|slice:":8" }}</div>
+                        <div class="card-header">Server {{ cont.id|slice:":5" }}</div>
                         <div class="card-body">
                             <p class="card-text">Alive for {{ cont.alive_for|floatformat:0 }} seconds.</p>
                             <p class="card-text">{{ cont.num_players }} player{{ cont.num_players|pluralize }} {{ cont.num_players|pluralize:"is,are" }} online!</p>

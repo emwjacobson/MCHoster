@@ -1,7 +1,6 @@
 FROM openjdk:11.0-jre-buster
 
-ENV MC_VERSION 1.16.3
-ENV PAPER_BUILD "latest"
+ENV PAPER_DOWNLOAD_URL https://papermc.io/api/v2/projects/paper/versions/1.16.4/builds/416/downloads/paper-1.16.4-416.jar
 ENV RAM 1G
 
 WORKDIR /server
