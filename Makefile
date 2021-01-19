@@ -12,17 +12,13 @@ username = emwjacobson
 # down-dev:
 # 	docker-compose -f docker-compose-dev.yml down --rmi all
 
-build:
+deploy-all:
 	docker login
 	docker build -t $(username)/mchoster_manager:latest manager
 	docker build -t $(username)/mchoster_nginx:latest nginx
 	docker build -t $(username)/mchoster_web:latest web
-	docker push $(username)/mchoster_manager
-	docker push $(username)/mchoster_nginx
-	docker push $(username)/mchoster_web
-
-deploy-server:
-	docker login
-	docker build --pull --rm -t mcserver:latest mcserver
-	docker tag mcserver:latest $(username)/mcserver:latest
+	docker build -t $(username)/mcserver:latest mcserver
+	docker push $(username)/mchoster_manager:latest
+	docker push $(username)/mchoster_nginx:latest
+	docker push $(username)/mchoster_web:latest
 	docker push $(username)/mcserver:latest
