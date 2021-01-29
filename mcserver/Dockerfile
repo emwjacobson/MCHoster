@@ -1,4 +1,5 @@
 FROM openjdk:11.0-jre-buster
+STOPSIGNAL SIGTERM
 
 ENV MC_MAJOR_VERSION 1.16
 ENV RAM 1G
@@ -11,11 +12,13 @@ RUN apt-get update && \
 
 COPY setup.sh .
 COPY data .
+COPY commands.sh .
 
 RUN chmod +x setup.sh
+RUN chmod +x commands.sh
 RUN useradd user
 RUN chown -R user:user /server
 
 USER user
 
-CMD [ "./setup.sh" ]
+CMD [ "/server/setup.sh" ]

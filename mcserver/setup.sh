@@ -1,5 +1,12 @@
 #!/bin/bash
 
+function END() {
+    PID=$(pidof java)
+    kill -n 15 ${PID}
+    wait ${PID}
+    exit 1
+}
+
 MAJOR_VERSION=${MC_MAJOR_VERSION}
 DATA=$(curl -s -X GET "https://papermc.io/api/v2/projects/paper/version_group/1.16/builds" -H  "accept: application/json")
 VERSION=$(echo ${DATA} | jq -r '.builds[-1].version')
@@ -13,5 +20,13 @@ if [ ! -f server.jar ]; then
     echo "eula=true" > eula.txt
 fi
 
+trap END SIGTERM
+trap END SIGINT
+
 # Run server
-cat commands.txt | java -Xms${RAM} -Xmx${RAM} -jar server.jar nogui
+/bin/bash commands.sh | java -Xms${RAM} -Xmx${RAM} -jar server.jar nogui &
+
+while :
+do
+    sleep 10
+done

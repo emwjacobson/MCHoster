@@ -159,7 +159,8 @@ def create_service(username):
     port = randint(port_min, port_max)
 
     return client.services.create('emwjacobson/mcserver:latest', endpoint_spec=EndpointSpec(ports={port: (25565, "tcp")}),
-                                 labels={stack_name: '', 'username': username}, env=env, networks=[stack_name+"_default"])
+                                 labels={stack_name: '', 'username': username}, env=env, networks=[stack_name+"_default"],
+                                 stop_signal="SIGTERM")
     # return client.containers.run('emwjacobson/mcserver:latest', mem_limit='1.5g', cpu_quota=100000, cpu_period=100000,
     #                              remove=True, detach=True, ports={'25565/tcp': port_range, '25565/udp': port_range},
     #                              labels={check_label: '', 'username': username}, network=check_label,
@@ -349,7 +350,7 @@ def start_server(username=None):
 def stop_server(service_id):
     service_id = escape(service_id)
 
-    if len(service_id) < 25:
+    if len(service_id) != 25:
         return {
             **response_error,
             "message": "Invalid server ID"
